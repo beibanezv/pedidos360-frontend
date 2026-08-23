@@ -1,0 +1,77 @@
+<main class="wrap">
+
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">CURADURÍA DE AUDIO · ENVÍO EN 48H</p>
+      <h1>El sonido<br><em>que se queda</em></h1>
+      <p class="lead">Vinilos prensados en calidad audiófila, tornamesas restauradas y equipos elegidos por su carácter, no por la moda.</p>
+      <a href="#catalogo" class="btn-primary">Explorar catálogo →</a>
+    </div>
+    <div class="hero-art">
+      <svg viewBox="0 0 300 300" role="img" aria-label="Tornamesa ilustrada">
+        <circle cx="150" cy="150" r="118" fill="var(--panel-2)" stroke="var(--hair)" stroke-width="1"/>
+        <g class="platter">
+          <circle cx="150" cy="150" r="118" fill="none" stroke="rgba(241,233,218,0.10)" stroke-width="1"/>
+          <circle cx="150" cy="150" r="100" fill="none" stroke="rgba(241,233,218,0.08)" stroke-width="1"/>
+          <circle cx="150" cy="150" r="82" fill="none" stroke="rgba(241,233,218,0.08)" stroke-width="1"/>
+          <circle cx="150" cy="150" r="64" fill="none" stroke="rgba(241,233,218,0.08)" stroke-width="1"/>
+          <circle cx="150" cy="150" r="46" fill="var(--copper)"/>
+          <circle cx="150" cy="150" r="46" fill="none" stroke="var(--ink)" stroke-width="1" stroke-dasharray="1 7"/>
+          <circle cx="150" cy="150" r="5" fill="var(--ink)"/>
+        </g>
+        <line x1="255" y1="70" x2="205" y2="120" stroke="var(--paper-dim)" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="255" cy="70" r="8" fill="var(--paper-dim)"/>
+        <circle cx="205" cy="120" r="4" fill="var(--copper)"/>
+      </svg>
+    </div>
+  </section>
+
+  <section class="chips">
+    @for (categoria of categorias; track categoria) {
+      <a class="chip" href="#catalogo">{{ categoria }}</a>
+    }
+  </section>
+
+  <section class="featured" id="catalogo">
+    <div class="section-head">
+      <h2>Destacados esta semana</h2>
+      <span>{{ productos.length }} productos</span>
+    </div>
+    <div class="grid">
+      @for (p of productos; track p.id) {
+        <article class="product-card">
+          <div class="sleeve">
+            <div class="art" [style.background]="p.fondo">
+              @switch (p.arte) {
+                @case ('cuadro') {
+                  <svg viewBox="0 0 100 100" width="60%" height="60%"><rect x="20" y="20" width="60" height="60" fill="none" stroke="var(--ink)" stroke-width="2" opacity="0.5"/><circle cx="50" cy="50" r="14" fill="var(--ink)" opacity="0.5"/></svg>
+                }
+                @case ('circulo') {
+                  <svg viewBox="0 0 100 100" width="60%" height="60%"><circle cx="50" cy="50" r="30" fill="none" stroke="var(--ink)" stroke-width="2" opacity="0.5"/><circle cx="50" cy="50" r="6" fill="var(--ink)" opacity="0.5"/></svg>
+                }
+                @case ('triangulo') {
+                  <svg viewBox="0 0 100 100" width="60%" height="60%"><path d="M20 70 L50 20 L80 70 Z" fill="none" stroke="var(--paper)" stroke-width="2" opacity="0.4"/></svg>
+                }
+                @case ('amplificador') {
+                  <svg viewBox="0 0 100 100" width="60%" height="60%"><rect x="25" y="35" width="50" height="30" rx="2" fill="none" stroke="var(--copper)" stroke-width="2"/><circle cx="35" cy="50" r="5" fill="var(--copper)"/><circle cx="65" cy="50" r="5" fill="var(--copper)"/></svg>
+                }
+              }
+            </div>
+            <div class="vinyl-peek">
+              <svg viewBox="0 0 100 100"><circle class="grooves" cx="50" cy="50" r="46" fill="var(--panel-2)" stroke="var(--hair)" stroke-width="1"/><circle cx="50" cy="50" r="16" [attr.fill]="p.acento"/><circle cx="50" cy="50" r="2" fill="var(--ink)"/></svg>
+            </div>
+          </div>
+          <div class="info">
+            <h3>{{ p.titulo }}</h3>
+            <p class="artist">{{ p.artista }}</p>
+            <div class="row">
+              <span class="price">{{ precio(p.precio) }}</span>
+              <button type="button" class="btn-add">Agregar</button>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+
+</main>

@@ -1,59 +1,50 @@
-# Pedidos360Frontend
+# pedidos360-frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.34.
+Frontend Angular del e-commerce ficticio **Pedidos360** (vinilos y equipos de audio).
+Proyecto académico — DSY1107 Desarrollo Cloud Native I, DuocUC.
 
-## Development server
+## Stack
 
-To start a local development server, run:
+- Angular 20 (componentes standalone) + MSAL Angular (`@azure/msal-angular`)
+- Autenticación: Azure AD / Entra ID vía OAuth 2.0 / OIDC — **Authorization Code + PKCE** (flujo Redirect, default de MSAL)
+- `MsalGuard` protege rutas privadas; `MsalInterceptor` adjunta el JWT a las llamadas hacia `apiUrl`
+- CSS plano con tokens de diseño propios (ver carpeta raíz del curso, `AGENTS.md`)
 
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Cómo correr
 
 ```bash
-ng generate component component-name
+npm install
+npm start        # ng serve en http://localhost:4200
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Configuración de Azure AD (pendiente)
 
-```bash
-ng generate --help
+Los valores en `src/environments/environment.ts` son **placeholders**. Al crear el
+Tenant + App Registration, reemplazar:
+
+| Campo | Dónde se obtiene |
+|---|---|
+| `clientId` | App Registration → Application (client) ID |
+| `authority` | `https://login.microsoftonline.com/<Directory (tenant) ID>` |
+| `redirectUri` | Debe estar registrado en el App Registration (SPA platform, tipo `spa`) |
+| `apiScopes` | Scopes expuestos por el backend (`api://<clientId>/Productos.Read`, etc.) |
+
+Mientras los placeholders estén sin reemplazar, el login fallará con error de
+`clientId` inválido: es lo esperado.
+
+## Rutas
+
+- `/` — home pública (hero + catálogo mockeado hasta que exista ms-productos)
+- `/cuenta` — protegida por `MsalGuard`, muestra los claims del token (verificar que lleguen `roles` y `scp`)
+
+## Estructura
+
 ```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
+src/app/
+  app.config.ts    providers + wiring MSAL (instance, guard, interceptor)
+  app.routes.ts    rutas + MsalGuard
+  app.ts/.html     shell: topbar (login/logout), router-outlet, footer
+  home/            página pública con grilla de productos mock
+  cuenta/          página protegida, inspección de claims del JWT
+  data/            catálogo mockeado
 ```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
