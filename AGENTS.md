@@ -38,6 +38,9 @@ npx ng test      # tests (usa CHROME_BIN o Edge headless si no hay Chrome)
 
 ## Convenciones
 
+- **Ramas**: no trabajar directo en `main`. Una rama corta por tarea
+  (`feature/login-azure`, `fix/...`), se fusiona a `main` cuando compila y los
+  tests pasan, y se borra. Sin telarañas de ramas: 1–2 activas basta.
 - **Commits en español**, lenguaje plano e imperativo: "agrega vista de carrito".
 - **Tags `vX.Y.Z`** recién desde la primera versión funcional completa
   (login + catálogo + carrito end-to-end) → `v1.0.0`. Antes: solo commits.
