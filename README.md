@@ -3,6 +3,17 @@
 Frontend Angular del e-commerce ficticio **Pedidos360** (vinilos y equipos de audio).
 Proyecto académico — DSY1107 Desarrollo Cloud Native I, DuocUC.
 
+## Estado del proyecto
+
+- [x] Scaffold Angular standalone + routing
+- [x] Diseño portado del mockup (tokens, tipografías, tarjetas con vinilo)
+- [x] Autenticación MSAL cableada (guard, interceptor, redirect + PKCE) — pendiente credenciales reales de Azure
+- [x] Home pública con catálogo mockeado
+- [ ] Login funcionando (bloqueado por: crear Tenant + App Registration en Azure)
+- [ ] Catálogo real desde ms-productos
+
+> Detalle completo y próximo paso: ver `AGENTS.md`.
+
 ## Stack
 
 - Angular 20 (componentes standalone) + MSAL Angular (`@azure/msal-angular`)
