@@ -5,19 +5,19 @@
       Pedidos360
     </a>
     <div class="nav-links">
-      <a href="#">Vinilos</a>
-      <a href="#">Tornamesas</a>
-      <a href="#">Audífonos</a>
-      <a href="#">Amplificadores</a>
+      <a routerLink="/">Catálogo</a>
     </div>
     <div class="nav-actions">
-      @if (loggedIn()) {
+      @if (auth.logueado()) {
+        @if (auth.esAdmin()) {
+          <a routerLink="/admin" class="btn-ghost">Admin</a>
+        }
         <a routerLink="/cuenta" class="btn-ghost">Mi cuenta</a>
-        <button type="button" class="btn-ghost" (click)="logout()">Salir</button>
+        <button type="button" class="btn-ghost" (click)="auth.logout()">Salir</button>
       } @else {
-        <button type="button" class="btn-ghost" (click)="login()">Ingresar</button>
+        <button type="button" class="btn-ghost" (click)="auth.login()">Ingresar</button>
       }
-      <a class="cart" href="#"><span>Carrito</span><span class="cart-badge">0</span></a>
+      <a class="cart" routerLink="/carrito"><span>Carrito</span><span class="cart-badge">{{ carrito.count() }}</span></a>
     </div>
   </div>
 </nav>

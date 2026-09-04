@@ -268,10 +268,28 @@ nav.topbar{
   border-radius: 3px;
 }
 .btn-add:hover{ border-color: var(--copper); color: var(--copper); }
+.btn-add:disabled{ opacity:.4; cursor:not-allowed; }
+.btn-add:disabled:hover{ border-color: var(--hair); color: var(--paper); }
 
 /* ---------- cuenta ---------- */
 .cuenta{ padding: 64px 0 120px; max-width: 720px; }
 .cuenta h1{ font-size: 36px; margin-bottom: 12px; }
+.roles{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top: 4px;
+}
+.role-chip{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  letter-spacing:0.05em;
+  padding:5px 12px;
+  border-radius:20px;
+  border:1px solid var(--hair);
+  color: var(--paper-dim);
+}
+.role-chip.admin{ border-color: var(--copper); color: var(--copper); }
 .claims{
   width:100%;
   border-collapse:collapse;

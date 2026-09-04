@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
 import { EMPTY } from 'rxjs';
 import { MSAL_INSTANCE, MsalBroadcastService, MsalService } from '@azure/msal-angular';
 
@@ -20,6 +21,7 @@ describe('App', () => {
       imports: [App],
       providers: [
         provideRouter([]),
+        provideHttpClient(),
         { provide: MSAL_INSTANCE, useValue: msalInstanceStub },
         MsalService,
         MsalBroadcastService,

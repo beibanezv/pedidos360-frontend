@@ -1,0 +1,119 @@
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { InteractionStatus } from '@azure/msal-browser';
+import { MsalBroadcastService, MsalService } from '@azure/msal-angular';
+import { filter, firstValueFrom } from 'rxjs';
+
+import { environment } from '../../../environments/environment';
+
+export interface TokenClaims {
+  oid?: string;
+  sub?: string;
+  roles?: string[];
+  scp?: string[] | string;
+  [claim: string]: unknown;
+}
+
+/** Decodifica el payload de un JWT (parte [1]) sin librerías externas. */
+function decodeJwtPayload(segment?: string): TokenClaims {
+  if (!segment) return {};
+  try {
+    const base64 = segment.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+    const utf8 = decodeURIComponent(
+      atob(padded)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join(''),
+    );
+    return JSON.parse(utf8) as TokenClaims;
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Estado de sesión y claims del usuario.
+ *
+ * Los app roles de Azure (Cliente/Admin) y los scopes (Productos.Read,
+ * Carrito.ReadWrite) vienen en el ACCESS token, no de forma fiable en el id_token:
+ * por eso aquí se hace acquireTokenSilent y se decodifica el payload.
+ */
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private readonly auth = inject(MsalService);
+  private readonly broadcast = inject(MsalBroadcastService);
+
+  readonly logueado = signal(this.auth.instance.getAllAccounts().length > 0);
+  readonly claims = signal<TokenClaims>({});
+
+  readonly roles = computed(() => this.claims().roles ?? []);
+  readonly esCliente = computed(() => this.roles().includes('Cliente'));
+  readonly esAdmin = computed(() => this.roles().includes('Admin'));
+  readonly oid = computed(() => this.claims().oid ?? this.claims().sub);
+
+  readonly scopes = computed(() => {
+    const scp = this.claims().scp;
+    if (Array.isArray(scp)) return scp;
+    if (typeof scp === 'string') return scp.split(' ').filter(Boolean);
+    return [];
+  });
+
+  readonly nombre = computed(() => {
+    this.logueado();
+    const acc = this.auth.instance.getAllAccounts()[0];
+    return acc?.name || acc?.username || 'Usuario';
+  });
+
+  constructor() {
+    // Se suscribe de por vida (servicio raíz): no hace falta takeUntilDestroyed.
+    // Este es el reemplazo standalone del <msal-redirect>: procesa la respuesta
+    // del redirect al volver de Azure (ver AGENTS.md → SIMPLIFICADO).
+    this.auth.handleRedirectObservable().subscribe();
+
+    this.broadcast.inProgress$
+      .pipe(filter((status) => status === InteractionStatus.None))
+      .subscribe(() => this.sincronizar());
+  }
+
+  login(): void {
+    this.auth.loginRedirect();
+  }
+
+  logout(): void {
+    this.auth.logoutRedirect();
+  }
+
+  /** Recalcula sesión + claims (del access token) cuando cambia el estado MSAL. */
+  async sincronizar(): Promise<void> {
+    const account = this.auth.instance.getAllAccounts()[0];
+    this.logueado.set(!!account);
+    if (!account) {
+      this.claims.set({});
+      return;
+    }
+    try {
+      const resultado = await firstValueFrom(
+        this.auth.acquireTokenSilent({
+          scopes: environment.azure.apiScopes,
+          account,
+        }),
+      );
+      this.claims.set(decodeJwtPayload(resultado.accessToken.split('.')[1]));
+    } catch {
+      // Sin consentimiento/red no alcanzable: caer al id_token (roles pueden faltar).
+      this.claims.set({ ...decodeJwtPayload(account.idToken?.split('.')[1]), fuente: 'id_token' });
+    }
+  }
+
+/**
+   * Garantiza que los claims del access token estén cargados antes de decidir
+   * por rol (lo usan guards con CanActivate funcional). Cae al id_token si
+   * el silent no puede obtener el access token.
+   */
+  async asegurarClaims(): Promise<TokenClaims> {
+    if (this.logueado() && Object.keys(this.claims()).length === 0) {
+      await this.sincronizar();
+    }
+    return this.claims();
+  }
+}

@@ -27,7 +27,7 @@
   </section>
 
   <section class="chips">
-    @for (categoria of categorias; track categoria) {
+    @for (categoria of categorias(); track categoria) {
       <a class="chip" href="#catalogo">{{ categoria }}</a>
     }
   </section>
@@ -35,43 +35,36 @@
   <section class="featured" id="catalogo">
     <div class="section-head">
       <h2>Destacados esta semana</h2>
-      <span>{{ productos.length }} productos</span>
+      <span>{{ productos().length }} productos</span>
     </div>
-    <div class="grid">
-      @for (p of productos; track p.id) {
-        <article class="product-card">
-          <div class="sleeve">
-            <div class="art" [style.background]="p.fondo">
-              @switch (p.arte) {
-                @case ('cuadro') {
-                  <svg viewBox="0 0 100 100" width="60%" height="60%"><rect x="20" y="20" width="60" height="60" fill="none" stroke="var(--ink)" stroke-width="2" opacity="0.5"/><circle cx="50" cy="50" r="14" fill="var(--ink)" opacity="0.5"/></svg>
-                }
-                @case ('circulo') {
-                  <svg viewBox="0 0 100 100" width="60%" height="60%"><circle cx="50" cy="50" r="30" fill="none" stroke="var(--ink)" stroke-width="2" opacity="0.5"/><circle cx="50" cy="50" r="6" fill="var(--ink)" opacity="0.5"/></svg>
-                }
-                @case ('triangulo') {
-                  <svg viewBox="0 0 100 100" width="60%" height="60%"><path d="M20 70 L50 20 L80 70 Z" fill="none" stroke="var(--paper)" stroke-width="2" opacity="0.4"/></svg>
-                }
-                @case ('amplificador') {
-                  <svg viewBox="0 0 100 100" width="60%" height="60%"><rect x="25" y="35" width="50" height="30" rx="2" fill="none" stroke="var(--copper)" stroke-width="2"/><circle cx="35" cy="50" r="5" fill="var(--copper)"/><circle cx="65" cy="50" r="5" fill="var(--copper)"/></svg>
-                }
-              }
+
+    @if (cargando()) {
+      <p class="lead">Cargando catálogo…</p>
+    } @else if (error()) {
+      <p class="lead">No se pudo cargar el catálogo.</p>
+    } @else {
+      <div class="grid">
+        @for (p of productos(); track p.id) {
+          <article class="product-card">
+            <div class="sleeve">
+              <app-producto-arte [arte]="p.arte" [fondo]="p.fondo" [acento]="p.acento" />
             </div>
-            <div class="vinyl-peek">
-              <svg viewBox="0 0 100 100"><circle class="grooves" cx="50" cy="50" r="46" fill="var(--panel-2)" stroke="var(--hair)" stroke-width="1"/><circle cx="50" cy="50" r="16" [attr.fill]="p.acento"/><circle cx="50" cy="50" r="2" fill="var(--ink)"/></svg>
+            <div class="info">
+              <h3>{{ p.titulo }}</h3>
+              <p class="artist">{{ p.artista }}</p>
+              <div class="row">
+                <span class="price">{{ precio(p.precio) }}</span>
+                <button
+                  type="button"
+                  class="btn-add"
+                  [disabled]="p.stock < 1"
+                  (click)="agregar(p)">{{ p.stock < 1 ? 'Sin stock' : 'Agregar' }}</button>
+              </div>
             </div>
-          </div>
-          <div class="info">
-            <h3>{{ p.titulo }}</h3>
-            <p class="artist">{{ p.artista }}</p>
-            <div class="row">
-              <span class="price">{{ precio(p.precio) }}</span>
-              <button type="button" class="btn-add">Agregar</button>
-            </div>
-          </div>
-        </article>
-      }
-    </div>
+          </article>
+        }
+      </div>
+    }
   </section>
 
 </main>

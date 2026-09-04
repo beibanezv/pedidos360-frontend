@@ -1,0 +1,55 @@
+<main class="wrap">
+  <section class="carrito">
+    <h1>Tu carrito</h1>
+
+    @if (cargando()) {
+      <p class="lead">Cargando carrito…</p>
+    } @else if (error()) {
+      <p class="lead">{{ error() }}</p>
+    } @else if (items().length === 0) {
+      <p class="lead">Tu carrito está vacío.</p>
+      <a routerLink="/" class="btn-primary">Ir al catálogo</a>
+    } @else {
+      @if (mensaje()) {
+        <p class="ok">{{ mensaje() }}</p>
+      }
+
+      <div class="rows">
+        @for (v of itemsVista(); track v.item.id) {
+          <div class="carrito-row">
+            <div class="sleeve sleeve-mini">
+              @if (v.producto) {
+                <app-producto-arte [arte]="v.producto.arte" [fondo]="v.producto.fondo" [acento]="v.producto.acento" />
+              } @else {
+                <div class="art"></div>
+              }
+            </div>
+            <div class="row-main">
+              <h3>{{ v.producto?.titulo ?? 'Producto eliminado' }}</h3>
+              <p class="artist">{{ v.producto?.artista ?? v.item.productoId }}</p>
+              <div class="qty">
+                <button type="button" class="qty-btn" (click)="menos(v.item)">−</button>
+                <span class="qty-num">{{ v.item.cantidad }}</span>
+                <button type="button" class="qty-btn" (click)="mas(v.item)">+</button>
+              </div>
+            </div>
+            <div class="row-side">
+              <span class="row-price">{{ precio(subtotal(v.item)) }}</span>
+              <button type="button" class="remove" (click)="eliminar(v.item)">Quitar</button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="totals">
+        <span>Total</span>
+        <span class="price">{{ precio(total()) }}</span>
+      </div>
+
+      <div class="actions">
+        <a routerLink="/" class="btn-ghost">Seguir comprando</a>
+        <button type="button" class="btn-primary" (click)="finalizarCompra()">Finalizar compra</button>
+      </div>
+    }
+  </section>
+</main>
