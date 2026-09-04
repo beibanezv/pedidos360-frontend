@@ -18,11 +18,18 @@ npx ng test      # tests (usa CHROME_BIN o Edge headless si no hay Chrome)
 
 - [x] Scaffold Angular standalone + routing
 - [x] Tema portado del mockup (tokens, Fraunces/Space Grotesk/IBM Plex Mono, vinilo hover)
-- [x] Wiring MSAL completo: MsalGuard en `/cuenta`, MsalInterceptor, redirect + PKCE
-- [x] Home pública con catálogo mockeado (`src/app/data/productos.mock.ts`)
-- [ ] **PRÓXIMO PASO**: crear Tenant + App Registration en Azure y reemplazar los
-      `TODO-*` en `src/environments/environment.ts` → login real funcionando
-- [ ] Conectar catálogo real cuando exista ms-productos (cambiar mock por HttpClient)
+- [x] Wiring MSAL completo: MsalGuard en `/cuenta`/`/carrito`/`/admin`, MsalInterceptor, redirect + PKCE
+- [x] Estructura `core/` + `services/`: ProductoService (catálogo real + fallback mock),
+      CarritoService (badge con signal), AuthService (claims del access token)
+- [x] Home con catálogo desde ms-productos (o fallback mock) y "Agregar" → carrito
+- [x] Página `/carrito` protegida e integrada (título/arte del catálogo, checkout)
+- [x] Roles en UI: `adminGuard`, `/admin`, navbar condicional, chips de rol en `/cuenta`
+- [x] Guías cloud en este repo: `docs/azure-setup.md` (App Registration/scopes/App Roles) y
+      `docs/aws-setup.md` + Lambda authorizer en `docs/lambda-authorizer/`
+- [ ] **PRÓXIMO PASO**: completar Tenant + App Registration en Azure (pasos de
+      `docs/azure-setup.md`) y reemplazar los `TODO-*` en `src/environments/environment.ts`
+- [ ] Desplegar API Gateway + EC2 (pasos de `docs/aws-setup.md`) y `useGateway: true`
+- [ ] Tag `v1.0.0` recién cuando login + catálogo + carrito funcionen end-to-end
 
 ## Decisiones que no romper
 

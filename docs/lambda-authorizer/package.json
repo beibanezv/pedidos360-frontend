@@ -1,0 +1,10 @@
+{
+  "name": "pedidos360-jwt-authorizer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Autenticador del API Gateway: valida JWT de Azure AD (firma via JWKS, iss y aud) y aplica scope/rol por ruta.",
+  "dependencies": {
+    "jose": "^5.9.6"
+  }
+}
