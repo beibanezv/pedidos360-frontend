@@ -1,34 +1,17 @@
 /**
- * SIMPLIFICADO: catálogo mockeado hasta que ms-productos exista (fase 3 del plan).
- * Upgrade: reemplazar por HttpClient contra /productos a través del Gateway.
+ * Catálogo de respaldo (offline/dev sin backend o sin Gateway).
+ * El ProductoService lo usa como fallback si la API no es alcanzable.
+ * Ya no se exportan tipos: viven en core/models/producto.ts.
  */
-export type Categoria = 'Vinilos' | 'Tornamesas' | 'Audífonos' | 'Amplificadores';
-export type ArteMock = 'cuadro' | 'circulo' | 'triangulo' | 'amplificador';
+import type { ProductoBackend } from '../core/models/producto';
 
-export interface Producto {
-  id: number;
-  titulo: string;
-  artista: string;
-  categoria: Categoria;
-  precio: number; // CLP
-  fondo: string; // color del arte de la carátula
-  arte: ArteMock;
-  acento: string; // color de la etiqueta del vinilo que asoma
-}
-
-export const CATEGORIAS: readonly Categoria[] = ['Vinilos', 'Tornamesas', 'Audífonos', 'Amplificadores'];
-
-export const PRODUCTOS_MOCK: Producto[] = [
-  { id: 1, titulo: 'Horizonte', artista: 'Trío Marejada — LP', categoria: 'Vinilos', precio: 18990, fondo: 'var(--sage)', arte: 'cuadro', acento: 'var(--copper)' },
-  { id: 2, titulo: 'Tornamesa C-40', artista: 'Serie artesanal', categoria: 'Tornamesas', precio: 189990, fondo: 'var(--copper-dim)', arte: 'circulo', acento: 'var(--sage)' },
-  { id: 3, titulo: 'Auriculares Séptimo', artista: 'Madera y cobre', categoria: 'Audífonos', precio: 79990, fondo: 'var(--rust)', arte: 'triangulo', acento: 'var(--copper)' },
-  { id: 4, titulo: 'Amplificador MK II', artista: 'Edición limitada · válvulas', categoria: 'Amplificadores', precio: 249990, fondo: 'var(--panel-2)', arte: 'amplificador', acento: 'var(--sage)' },
-  { id: 5, titulo: 'Costera EP', artista: 'Banda del Puerto', categoria: 'Vinilos', precio: 15990, fondo: 'var(--copper-dim)', arte: 'circulo', acento: 'var(--copper)' },
-  { id: 6, titulo: 'Nocturno', artista: 'Ana Volant — LP', categoria: 'Vinilos', precio: 19990, fondo: 'var(--rust)', arte: 'cuadro', acento: 'var(--sage)' },
-  { id: 7, titulo: 'Tornamesa R-2', artista: 'Portátil · belt-drive', categoria: 'Tornamesas', precio: 99990, fondo: 'var(--panel-2)', arte: 'circulo', acento: 'var(--copper)' },
-  { id: 8, titulo: 'Monitores Estudio 5', artista: 'Par activo', categoria: 'Audífonos', precio: 129990, fondo: 'var(--copper-dim)', arte: 'amplificador', acento: 'var(--sage)' },
+export const PRODUCTOS_FALLBACK: ProductoBackend[] = [
+  { id: 'mock-1', nombre: 'Horizonte', artistaOMarca: 'Trío Marejada — LP', categoria: 'vinilo', precioClp: 18990, stock: 12, descripcion: 'Prensado en calidad audiófila.' },
+  { id: 'mock-2', nombre: 'Tornamesa C-40', artistaOMarca: 'Serie artesanal', categoria: 'tornamesa', precioClp: 189990, stock: 5, descripcion: 'Belt-drive, brazo de carbono.' },
+  { id: 'mock-3', nombre: 'Auriculares Séptimo', artistaOMarca: 'Madera y cobre', categoria: 'audifono', precioClp: 79990, stock: 8, descripcion: 'Cerrados, impedancia 32Ω.' },
+  { id: 'mock-4', nombre: 'Amplificador MK II', artistaOMarca: 'Edición limitada · válvulas', categoria: 'amplificador', precioClp: 249990, stock: 3, descripcion: 'Válvulas EL34, 2x40W.' },
+  { id: 'mock-5', nombre: 'Costera EP', artistaOMarca: 'Banda del Puerto', categoria: 'vinilo', precioClp: 15990, stock: 20, descripcion: 'EP en vinilo color.' },
+  { id: 'mock-6', nombre: 'Nocturno', artistaOMarca: 'Ana Volant — LP', categoria: 'vinilo', precioClp: 19990, stock: 15, descripcion: 'LP 180g con sleeve impreso.' },
+  { id: 'mock-7', nombre: 'Tornamesa R-2', artistaOMarca: 'Portátil · belt-drive', categoria: 'tornamesa', precioClp: 99990, stock: 6, descripcion: 'Batería integrada, USB out.' },
+  { id: 'mock-8', nombre: 'Monitores Estudio 5', artistaOMarca: 'Par activo', categoria: 'audifono', precioClp: 129990, stock: 4, descripcion: 'Bi-amplificados, 5".' },
 ];
-
-export function formatPrecio(precio: number): string {
-  return '$' + precio.toLocaleString('es-CL');
-}
