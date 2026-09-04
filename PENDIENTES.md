@@ -91,14 +91,13 @@ Análisis cruzado entre los requerimientos (`Enunciado_Evaluacion_1.md`, `EP1_DS
 
 ---
 
-## Orden sugerido de ejecución
+## Orden sugerido de ejecución (lo que queda)
 
-1. **Azure Tenant + App Registration** → desbloquea login real
+1. **Azure Tenant + App Registration** → desbloquea login real (pasos de `docs/azure-setup.md`)
 2. **AWS API Gateway + JWT Authorizer** → cumple el 40% del rubro (BFF)
 3. **CORS en el Gateway** → requiere saber el dominio del frontend
-4. **Conectar catálogo real + servicios en el frontend** → flujo end-to-end
-5. **Página de carrito** → funcionalidad completa
-6. **Roles en UI** → pulido final
+4. **Apuntar el frontend al Gateway** (`environment.*` + `useGateway: true`) → flujo end-to-end
+5. **Tag `v1.0.0`** cuando login + catálogo + carrito funcionen end-to-end
 
 ---
 
