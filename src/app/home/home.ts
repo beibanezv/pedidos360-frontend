@@ -47,6 +47,11 @@ export class Home {
 
   agregar(producto: Producto): void {
     if (!this.auth.logueado()) {
+      // Evidencia para la demo: sin sesión no hay token Azure y el backend
+      // respondería 401 Unauthorized. Se deja constancia antes de redirigir.
+      console.error(
+        '[carrito] 401 Unauthorized: sin sesión no hay token Azure para POST /carrito/items; redirigiendo a /login'
+      );
       this.router.navigate(['/login']);
       return;
     }
