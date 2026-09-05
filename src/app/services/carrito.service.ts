@@ -14,6 +14,9 @@ import { Producto } from '../core/models/producto';
 @Injectable({ providedIn: 'root' })
 export class CarritoService {
   private readonly http = inject(HttpClient);
+  // SIMPLIFICADO: HttpBackend inyectado como campo (en contexto de inyección);
+  // llamar inject() dentro de un método lanza NG0203 en runtime.
+  private readonly backend = inject(HttpBackend);
 
   private readonly totalItems = signal(0);
 
@@ -43,7 +46,7 @@ export class CarritoService {
    */
   agregarInvitado(producto: Producto, cantidad = 1): Observable<CarritoItemDTO> {
     const body = { productoId: producto.id, cantidad, precioUnitarioClp: producto.precio };
-    const plano = new HttpClient(inject(HttpBackend));
+    const plano = new HttpClient(this.backend);
     return plano.post<CarritoItemDTO>(`${this.base}/carrito/items`, body);
   }
 
