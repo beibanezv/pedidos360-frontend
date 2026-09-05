@@ -28,7 +28,10 @@ Los valores que produzcas se copian en:
 2. Nombre: `Pedidos360` — tipo de cuenta: **Accounts in this organizational directory only**
    (single tenant; si eliges multitenant, ajusta `authority`).
 3. Redirect URI (móvil/nativa y SPA): selecciona **Single-page application (SPA)** y agrega:
-   - `http://localhost:4200`
+    - `http://localhost:4200`
+
+> Visto en clase: el tipo debe ser **SPA, no Web** — con tipo Web el flujo del
+> frontend no funciona (fue el "cambio crítico" del ejercicio con MSAL).
 
 ## 3. Expose an API → scopes (delegated)
 
@@ -44,6 +47,12 @@ Los valores que produzcas se copian en:
 > En el access token, estos scopes aparecen en el claim `scp` como
 > `api://<client-id>/Productos.Read` y `api://<client-id>/Carrito.ReadWrite`.
 > Copia las URIs completas a `environment.azure.apiScopes`.
+>
+> Visto en clase (solo contexto): con *Certificados y secretos* se crea un
+> client secret para probar en Postman con `client_credentials`
+> (`POST https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token` con
+> `scope=<uri expuesta>/.default`). Ese secret **nunca va en el SPA**: el
+> frontend usa Authorization Code + PKCE (lo exige la rúbrica).
 
 ## 4. App Roles → roles de usuario (RBAC)
 
@@ -87,8 +96,24 @@ Equivalente en el manifest (`appRoles`):
 3. Opcional: *Manage → User consent settings* y activa "Allow user consent for apps" para
    que el primer login pida consentimiento de los scopes delegados.
 
-## 6. Llenar `environment.ts` / `environment.prod.ts`
+## 6. Backend (estilo visto en clase)
 
+Los 3 microservicios validan el JWT contra el JWKS de Azure así
+(`SecurityConfig` + `application.properties` de cada repo):
+
+```properties
+spring.security.oauth2.resourceserver.jwt.issuer-uri=https://login.microsoftonline.com/
+azure.tenant-id=<Directory (tenant) ID>
+```
+
+```java
+JwtDecoder = NimbusJwtDecoder.withJwkSetUri(issuerUri + tenantId + "/discovery/v2.0/keys")
+```
+
+En local se usa `azure.tenant-id=common` (sin fetch en startup); en EC2 se
+exporta `AZURE_TENANT_ID` con el tenant real (perfil `prod`).
+
+## 7. Llenar `environment.ts` / `environment.prod.ts`
 ```ts
 azure: {
   clientId: '<Application (client) ID>',
@@ -102,7 +127,7 @@ azure: {
 }
 ```
 
-## 7. Verificación
+## 8. Verificación
 
 1. `npm start` → *Ingresar* → te redirige a Microsoft, consientes, y vuelves a `/cuenta`.
 2. En `/cuenta` deben aparecer los chips `Cliente`/`Admin` y los scopes.

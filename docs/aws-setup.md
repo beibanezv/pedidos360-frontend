@@ -1,38 +1,48 @@
-# Despliegue en AWS — Pedidos360
+# Despliegue en AWS — Pedidos360 (estilo visto en clase)
 
-Infraestructura para el **BFF** (Indicador 2): un API Gateway REST como único punto
-de entrada, protegido por un **Lambda Authorizer** que valida el JWT de Azure AD
-(firma contra JWKS, `iss`, `aud` y vigencia) y rechaza con 401/403.
+Infraestructura para el **BFF / API Manager** (Indicador 2): un **HTTP API** de
+API Gateway como único punto de entrada, con **autorizador JWT nativo** que
+valida el token de Azure AD (firma contra JWKS, `iss`, `aud` y vigencia) y
+rechaza con 401/403. La validación fina de roles/scopes vive en ms-carrito
+(`@PreAuthorize`), como exige la rúbrica.
 
-Ingredientes: 2 instancias EC2 (ms-productos :8081, ms-carrito :8082) + 1 Lambda
-authorizer + 1 API Gateway.
+Máquinas (confirmado por el profesor: 3 EC2 + 1 RDS):
+2. EC2 #1 — ms-productos :8081 → RDS
+3. EC2 #2 — ms-carrito :8082 → RDS
+4. EC2 #3 — ms-login :8083 (sin BD: solo decodifica el JWT)
+5. EC2 #4 (misma u otra instancia) — frontend nginx :80, publicado con https
+   vía un segundo HTTP API con ruta `{proxy+}` (ver sección 7).
+
+> `docs/lambda-authorizer/` (REST + Lambda TOKEN) queda como **referencia no
+> desplegada**: la defensa usa solo lo visto en clase (HTTP API + autorizador
+> nativo). Avisar a Matías antes de borrarlo.
 
 ---
 
 ## 0. Pre-requisitos
 
-- Cuenta AWS con IAM (poder crear EC2, Lambda, API Gateway).
-- Docker local para buildar las imágenes.
-- Pares de llaves EC2 (region us-east-1 o la que uses).
-- Ya tener el tenant Azure + App Registration (ver `docs/azure-setup.md` en el frontend).
+- Cuenta AWS Academy Learner Lab. **OJO: el Lab resetea recursos entre
+  sesiones** — no dejes el deploy "listo" con antelación; reconstrúyelo cerca
+  de la entrega siguiendo esta guía (ideal: script de provisión).
+- Pares de llaves EC2 (región del Lab, normalmente us-east-1).
+- Tenant Azure + App Registration listos (ver `docs/azure-setup.md`).
 
-## 1. Buildar y publicar las imágenes (o copiarlas a la EC2)
+## 1. Imágenes Docker (una por microservicio)
 
 ```bash
-# en pedidos360-ms-productos
+# en pedidos360-ms-productos / ms-carrito / ms-login
 docker build -t pedidos360/ms-productos .
-# en pedidos360-ms-carrito
 docker build -t pedidos360/ms-carrito .
+docker build -t pedidos360/ms-login .
 ```
 
-Para EC2 puedes: subir la imagen al **Amazon ECR** (recomendado) o `docker save` +
-`scp` la imagen a la instancia. Ajusta bien los nombres de las variables en el paso 2.
+Sube a **ECR** o `docker save` + `scp` a cada EC2.
 
-> El Dockerfile compila y corre los tests del microservicio dentro de la imagen.
+> Cada Dockerfile compila y corre los tests dentro de la imagen.
 
-## 2. Instancias EC2 (una por microservicio)
+## 2. EC2 + RDS (una EC2 por microservicio)
 
-Crea dos EC2 (t2.micro basta para la demo, Amazon Linux 2023) e instala Docker:
+Crea tres EC2 (t2.micro basta, Amazon Linux 2023) e instala Docker:
 
 ```bash
 sudo dnf install -y docker
@@ -41,8 +51,9 @@ sudo usermod -aG docker ec2-user
 # (re-login / nuevo ssh)
 ```
 
-Pega la imagen y corre cada microservicio con perfil `prod`. Necesitas una Postgres
-alcanzable (RDS o una Postgres local en la propia EC2); apunta las URLs:
+Crea **un RDS Postgres** (o una Postgres local en una EC2 para la demo) con
+las BD `pedidos360_productos` y `pedidos360_carrito`, y corre cada servicio
+con perfil `prod`:
 
 ```bash
 # EC2 #1 — ms-productos
@@ -51,98 +62,86 @@ docker run -d --name ms-productos -p 8081:8081 \
   -e SPRING_DATASOURCE_URL="jdbc:postgresql://<RDS_ENDPOINT>:5432/pedidos360_productos" \
   -e SPRING_DATASOURCE_USERNAME="pedidos360" \
   -e SPRING_DATASOURCE_PASSWORD="<password>" \
-  -e AZURE_TENANT_JWKS_URI="https://login.microsoftonline.com/<TENANT_ID>/v2.0" \
+  -e AZURE_TENANT_ID="<Directory (tenant) ID>" \
   pedidos360/ms-productos
-```
 
-```bash
 # EC2 #2 — ms-carrito
 docker run -d --name ms-carrito -p 8082:8082 \
   -e SPRING_PROFILES_ACTIVE=prod \
   -e SPRING_DATASOURCE_URL="jdbc:postgresql://<RDS_ENDPOINT>:5432/pedidos360_carrito" \
   -e SPRING_DATASOURCE_USERNAME="pedidos360" \
   -e SPRING_DATASOURCE_PASSWORD="<password>" \
-  -e AZURE_TENANT_JWKS_URI="https://login.microsoftonline.com/<TENANT_ID>/v2.0" \
+  -e AZURE_TENANT_ID="<Directory (tenant) ID>" \
   pedidos360/ms-carrito
+
+# EC2 #3 — ms-login (sin BD)
+docker run -d --name ms-login -p 8083:8083 \
+  -e SPRING_PROFILES_ACTIVE=prod \
+  -e AZURE_TENANT_ID="<Directory (tenant) ID>" \
+  pedidos360/ms-login
 ```
 
-Security Group: abre **8081/8082** (o solo desde el VPC). Verifica localmente:
+Security Group: abre **8081/8082/8083** (o solo desde el VPC). Verifica:
 
 ```bash
 curl http://localhost:8081/productos    # 200
 curl http://localhost:8082/carrito      # 401 (sin token)
+curl http://localhost:8083/login/me     # 401 (sin token)
 ```
 
-## 3. Lambda authorizer
+## 3. API Gateway HTTP API (Método A: una ruta por método)
 
-Código en `docs/lambda-authorizer/` (Node 20, dependencia única `jose`).
+Como en `enrutando nuestra api segura.docx` y el tutorial 1.1.2:
 
-```bash
-cd docs/lambda-authorizer
-npm install
-# Empaquetar index.mjs + node_modules
-# Linux/mac:
-zip -r authorizer.zip index.mjs node_modules
-# PowerShell:
-Compress-Archive -Path index.mjs, node_modules -DestinationPath authorizer.zip
-```
+1. *API Gateway → Create API → **HTTP API** → Build*: nombre `Pedidos360`.
+2. **Rutas** (una por método — Método A; NO usar proxy `/{proxy+}` para el
+   API de negocio porque se pierde monitoreo y control por ruta):
+   - `GET /productos` (pública, sin autorizador)
+   - `POST /productos`, `PUT /productos/{id}`, `DELETE /productos/{id}`
+   - `GET /carrito`, `POST /carrito/items`, `PUT /carrito/items/{id}`,
+     `DELETE /carrito/items/{id}`, `POST /carrito/checkout`
+   - `GET /login/me`
+3. Por cada ruta: integración **HTTP URI** a la EC2 correspondiente, ej.
+   `http://<EC2-1>:8081/productos`, con el mismo método.
+4. **Stage** `desarrollo` (como en clase). Guarda la Invoke URL:
+   `https://<API_ID>.execute-api.<REGION>.amazonaws.com/desarrollo`
 
-En la consola Lambda:
+## 4. Autorizador JWT nativo (rutas seguras → 401 sin token)
 
-1. *Create function* → **Author from scratch**, runtime **Node.js 20.x**.
-2. Sube `authorizer.zip` (Upload from → zipped file).
-3. *Configuration → Environment variables*:
-   - `AZURE_TENANT_ID` = Directory (tenant) ID
-   - `AZURE_CLIENT_ID` = Application (client) ID
-4. Prueba: *Test* con un evento `{"type":"TOKEN","methodArn":"arn:aws:execute-api:us-east-1:ACCOUNT:API_ID/prod/GET/productos","authorizationToken":"Bearer <token-del-cuenta>","methodArn":"..."}`.
-   - Sin token → error "Unauthorized".
-   - Token real del navegador (DevTools → Network → autorización) → policy Allow.
+Como en `enrutando nuestra api segura.docx`:
 
-## 4. API Gateway REST
+1. Decodifica un access token real en Postman/jwt.io y copia el claim `iss`
+   (`https://login.microsoftonline.com/<TENANT_ID>/v2.0`).
+2. *API Gateway → tu HTTP API → Authorization → Create authorizer* tipo **JWT**:
+   - **Issuer**: el `iss` del paso 1.
+   - **Audience**: el Application (client) ID.
+3. Adjunta el autorizador a todas las rutas **excepto** `GET /productos`.
+4. **Redesplegar** el stage (sin esto el cambio no aplica).
+5. Prueba: ruta pública → 200; ruta segura sin token → **401**.
 
-1. *API Gateway → Create API → **REST API** → Build*: nombre `Pedidos360`, tipo **Regional**.
-2. **Resources** (crear en este orden under `/`):
-   - `/productos`, `/productos/{id}` (path param)
-   - `/carrito`, `/carrito/items`, `/carrito/items/{id}`, `/carrito/checkout`
-3. Por cada **método** (productos: GET/POST/PUT/DELETE; carrito: GET/POST/PUT/DELETE;
-   **OPTIONS** en todos para CORS):
-   - *Integration type* → **HTTP**, checkbox **Use proxy integration** (ON).
-   - *HTTP method*: igual al del método.
-   - *Endpoint URL*:
-     - `/productos*` → `http://<EC2-PUBLIC-DNS-1>:8081`
-     - `/carrito*` → `http://<EC2-PUBLIC-DNS-2>:8082`
-   - Con proxy, el path del request (`/productos`, `/carrito/items/{id}`, …) se
-     pasa tal cual al backend. No uses prefijo `/api` en los resources.
-4. **CORS** (Enable CORS on … for each resource):
-   - Allow Origin: `http://localhost:4200` (o el dominio del frontend en prod).
-   - Allow Methods: `GET,POST,PUT,DELETE,OPTIONS`.
-   - Allow Headers: `Content-Type,Authorization,X-Requested-With`.
-   - OPTIONS **no debe llevar authorizer** (deja *None*).
-5. **Authorizer** (aplicar a los métodos, excepto `GET /productos` y `OPTIONS`):
-   - *Authorizers → Create authorizer*: type **TOKEN**, **Lambda** `pedidos360-jwt-authorizer`.
-   - *Identity source*: `method.request.header.Authorization`.
-   - *Token validation expression*: `^Bearer [A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_=]+$`.
-   - Reutilización (TTL) 60 s; en la demo baja el TTL para ver más fácil los cambios.
-   - En *Method Request*, asocia el authorizer a los métodos protegidos.
-6. **Deploy**: *Actions → Deploy API* → Stage `prod`. Guarda el Invoke URL:
-   `https://<API_ID>.execute-api.<REGION>.amazonaws.com/prod`
+## 5. CORS (consola del HTTP API, según 1.1.4)
 
-## 5. Pruebas (evidencia 401/403 vs 200)
+*API Gateway → tu HTTP API → CORS → Configure*:
+- Dev: `Allow-Origin: *`. Prod: el dominio exacto del frontend.
+- `Allow-Headers`: `Content-Type, Authorization, ...`.
+- `Allow-Methods`: según las rutas (`GET,POST,PUT,DELETE`).
+
+## 6. Pruebas (evidencia 401/403 vs 200)
 
 ```bash
-BASE="https://<API_ID>.execute-api.<REGION>.amazonaws.com/prod"
+BASE="https://<API_ID>.execute-api.<REGION>.amazonaws.com/desarrollo"
 
-# 1. Sin token → 401
+# 1. Sin token → 401 (autorizador del Gateway)
 curl -i $BASE/carrito
 
 # 2. Token inválido → 401
 curl -i -H "Authorization: Bearer abc.def.ghi" $BASE/carrito
 
-# 3. Token válido SIN scope/rol (usuario no asignado al rol y sin consentimiento) → 403
+# 3. Token válido SIN scope/rol → 403 (lo rechaza ms-carrito)
 curl -i -H "Authorization: Bearer $TOKEN_SIN_SCOPE" $BASE/carrito
 
 # 4. Token válido → 200
-curl -i -H "Authorization: Bearer `$TOKEN`" $BASE/carrito
+curl -i -H "Authorization: Bearer $TOKEN" $BASE/carrito
 
 # 5. Catálogo público → 200 sin token
 curl -i $BASE/productos
@@ -150,31 +149,41 @@ curl -i $BASE/productos
 
 Guarda una captura de cada salida (`curl -i` muestra el status code) para la entrega.
 
-## 6. Conectar el frontend
+## 7. Frontend (nginx en EC2 + https vía Gateway, según clase)
 
-1. `src/environments/environment.prod.ts`:
+Como en `Desplegando mi frontend en AWS.docx`:
+
+1. Dockerfile multistage node → nginx + `nginx.conf` con fallback SPA
+   (`try_files $uri /index.html`); contenedor en EC2 puerto 80.
+2. Segundo **HTTP API** con ruta `{proxy+}` ANY →
+   `http://<IP-EC2-FRONTEND>/{proxy}` (stage `desarrollo`); la Invoke URL es
+   la URL pública https del frontend. (Este `{proxy+}` es solo para publicar
+   el frontend, NO para el API de negocio.)
+3. Agregar esa URL https a los **redirect URIs** en Azure + a la config de
+   auth del frontend, y apuntar el frontend al Gateway de negocio
+   (`environment.prod.ts` abajo). Redesplegar ambos.
+4. CORS en el Gateway de negocio (sección 5).
 
 ```ts
+// src/environments/environment.prod.ts
 export const environment = {
   production: true,
   useGateway: true,
-  apiUrl: 'https://<API_ID>.execute-api.<REGION>.amazonaws.com/prod',
-  // productosUrl/carritoUrl vacíos: no se usan con useGateway=true
+  apiUrl: 'https://<API_ID_NEGOCIO>.execute-api.<REGION>.amazonaws.com/desarrollo',
   azure: { /* valores reales de la guía azure-setup.md */ },
 };
 ```
 
-2. Build production: `npm run build` (inyecta `environment.prod.ts` vía
-   `fileReplacements` de `angular.json`) y despliega el `dist/` (S3+CloudFront, EC2
-   con nginx, etc.).
+Build: `npm run build` (inyecta `environment.prod.ts` vía `fileReplacements`).
 
 > El `MsalInterceptor` ya adjunta el JWT automáticamente a las llamadas al Gateway
 > (el `protectedResourceMap` usa `environment.apiUrl` cuando `useGateway` es true).
 
 ## Errores comunes AWS
 
-- **401 al probar OPTIONS** → quita el authorizer del preflight.
-- **403 en todas las rutas con token válido** → `aud`/`iss` mal en la Lambda, o el
-  scope/rol no está asignado (revísalo en el claim con jwt.io).
+- **401 en ruta que debería ser pública** → revisa qué rutas llevan autorizador.
+- **Cambios sin efecto** → falta redesplegar el stage.
+- **403 en todas las rutas con token válido** → `aud`/`iss` mal en el
+  autorizador, o el scope/rol no está asignado (revísalo en el claim con jwt.io).
 - **502 en la integración** → la EC2 no responde: security group cerrado o app caída.
-- **404 en el Gateway** → los resources no coinciden con `/productos`, `/carrito` (sin `/api`).
+- **404 en el Gateway** → las rutas no coinciden con `/productos`, `/carrito`, `/login` (sin `/api`).
