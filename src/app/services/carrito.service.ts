@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpBackend, HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 
@@ -35,6 +35,16 @@ export class CarritoService {
     return this.http.post<CarritoItemDTO>(`${this.base}/carrito/items`, body).pipe(
       tap(() => this.totalItems.update((n) => n + cantidad)),
     );
+  }
+
+  /**
+   * POST sin interceptores (sin Authorization): el backend responde 401 de verdad.
+   * Se usa para mostrar el rechazo genuino en consola como evidencia de la demo.
+   */
+  agregarInvitado(producto: Producto, cantidad = 1): Observable<CarritoItemDTO> {
+    const body = { productoId: producto.id, cantidad, precioUnitarioClp: producto.precio };
+    const plano = new HttpClient(inject(HttpBackend));
+    return plano.post<CarritoItemDTO>(`${this.base}/carrito/items`, body);
   }
 
   actualizarCantidad(item: CarritoItemDTO, cantidad: number): Observable<CarritoItemDTO> {
