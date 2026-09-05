@@ -1,0 +1,40 @@
+<main class="wrap">
+  <section class="featured">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Catálogo</p>
+        <h2>Catálogo completo</h2>
+      </div>
+      <span class="count">{{ productos().length }} productos</span>
+    </div>
+
+    @if (cargando()) {
+      <p class="lead">Cargando catálogo…</p>
+    } @else if (error()) {
+      <p class="lead">No se pudo cargar el catálogo.</p>
+    } @else {
+      <div class="grid">
+        @for (p of productos(); track p.id) {
+          <article class="product-card">
+            <div class="sleeve">
+              <app-producto-arte [arte]="p.arte" [fondo]="p.fondo" [acento]="p.acento" />
+            </div>
+            <div class="info">
+              <h3>{{ p.titulo }}</h3>
+              <p class="artist">{{ p.artista }}</p>
+              <div class="row">
+                <span class="price">{{ precio(p.precio) }}</span>
+                <button
+                  type="button"
+                  class="btn-add"
+                  [disabled]="p.stock < 1"
+                  (click)="agregar(p)">{{ p.stock < 1 ? 'Sin stock' : 'Agregar' }}</button>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </section>
+
+</main>
