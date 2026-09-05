@@ -18,7 +18,11 @@
       <button type="submit" class="btn-ghost">Entrar (demo)</button>
     </form>
     <div class="login-divisor"><span>o</span></div>
-    <button type="button" class="btn-primary" (click)="auth.login()">Continuar con Microsoft</button>
+    <!-- Botón con la identidad oficial de Microsoft (excepción justificada a los tokens del sitio). -->
+    <button type="button" class="btn-microsoft" (click)="auth.login()">
+      <svg width="21" height="21" viewBox="0 0 21 21" aria-hidden="true"><rect x="0" y="0" width="10" height="10" fill="#F25022"/><rect x="11" y="0" width="10" height="10" fill="#7FBA00"/><rect x="0" y="11" width="10" height="10" fill="#00A4EF"/><rect x="11" y="11" width="10" height="10" fill="#FFB900"/></svg>
+      <span>Continuar con Microsoft</span>
+    </button>
     <p class="login-nota">La sesión demo solo abre la interfaz. Agregar al carrito exige la cuenta Microsoft (el backend valida el token de Azure).</p>
   }
 </section>

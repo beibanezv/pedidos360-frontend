@@ -347,6 +347,15 @@ nav.topbar{
   color: var(--paper-dim);
   max-width: 52ch; margin-top: 20px;
 }
+/* Botón oficial "Sign in with Microsoft": identidad de marca, no tokens del sitio. */
+.btn-microsoft{
+  display:inline-flex; align-items:center; gap:12px;
+  background:#FFFFFF; color:#1B1B1B;
+  border:1px solid #8C8C8C; border-radius:2px;
+  font-family:'Segoe UI',system-ui,sans-serif; font-size:15px; font-weight:600;
+  padding: 12px 20px; cursor:pointer; max-width:420px;
+}
+.btn-microsoft:hover{ background:#F5F5F5; }
 .nav-user{ color: var(--paper-dim); font-size:14px; }
 
 /* ---------- footer ---------- */
