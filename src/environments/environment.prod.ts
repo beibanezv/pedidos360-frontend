@@ -3,7 +3,8 @@
  * Es el archivo que Angular inyecta al buildar con --configuration production
  * (fileReplacements en angular.json).
  *
- * Reemplaza los TODO-* con los valores reales de Azure y del Gateway cuando existan.
+ * Reemplaza el TODO-GATEWAY y el redirectUri con los valores reales al desplegar (fase 3).
+ * clientId/tenantId NO son secretos: este archivo SÍ se commitea.
  */
 export const environment = {
   production: true,
@@ -14,13 +15,13 @@ export const environment = {
   productosUrl: '',
   carritoUrl: '',
   azure: {
-    clientId: 'TODO-AZURE-CLIENT-ID',
-    authority: 'https://login.microsoftonline.com/TODO-AZURE-TENANT-ID',
+    clientId: '446c57cb-aba2-4b7a-ab01-6f2e6af7d35c',
+    authority: 'https://login.microsoftonline.com/e5372bf0-c5e3-4286-887c-79069f209c1f',
     knownAuthorities: ['login.microsoftonline.com'],
-    redirectUri: 'http://localhost:4200',
+    redirectUri: 'http://localhost:4200', // TODO fase 3: URL https pública del frontend
     apiScopes: [
-      'api://TODO-AZURE-CLIENT-ID/Productos.Read',
-      'api://TODO-AZURE-CLIENT-ID/Carrito.ReadWrite',
+      'api://446c57cb-aba2-4b7a-ab01-6f2e6af7d35c/Productos.Read',
+      'api://446c57cb-aba2-4b7a-ab01-6f2e6af7d35c/Carrito.ReadWrite',
     ],
   },
 };

@@ -1,11 +1,7 @@
 /**
- * Valores placeholder de Azure AD / Entra ID.
- *
- * Al crear el App Registration (fase 1 del plan en AGENTS.md), reemplaza:
- *   - clientId: Application (client) ID del registro
- *   - tenantId: Directory (tenant) ID
- *   - apiScopes: URIs expuestas por el backend (api://<clientId>/Scope)
- * No pongas secretos acá: este archivo SÍ se commitea.
+ * Azure AD / Entra ID (tenant josecamposar, App Registration Pedidos360).
+ * clientId/tenantId NO son secretos: este archivo SÍ se commitea.
+ * Nunca pongas un client secret acá (un SPA no lleva secret).
  */
 export const environment = {
   production: false,
@@ -19,15 +15,14 @@ export const environment = {
   productosUrl: 'http://localhost:8081',
   carritoUrl: 'http://localhost:8082',
   azure: {
-    clientId: 'TODO-AZURE-CLIENT-ID',
-    authority: 'https://login.microsoftonline.com/TODO-AZURE-TENANT-ID',
+    clientId: '446c57cb-aba2-4b7a-ab01-6f2e6af7d35c',
+    authority: 'https://login.microsoftonline.com/e5372bf0-c5e3-4286-887c-79069f209c1f',
     knownAuthorities: ['login.microsoftonline.com'],
     redirectUri: 'http://localhost:4200',
     // Scopes que pedirá MsalGuard al loguear y MsalInterceptor al llamar a la API.
-    // Mientras sean placeholders, el login fallará: es lo esperado hasta tener Azure listo.
     apiScopes: [
-      'api://TODO-AZURE-CLIENT-ID/Productos.Read',
-      'api://TODO-AZURE-CLIENT-ID/Carrito.ReadWrite',
+      'api://446c57cb-aba2-4b7a-ab01-6f2e6af7d35c/Productos.Read',
+      'api://446c57cb-aba2-4b7a-ab01-6f2e6af7d35c/Carrito.ReadWrite',
     ],
   },
 };
