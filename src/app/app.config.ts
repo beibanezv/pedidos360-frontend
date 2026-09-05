@@ -30,7 +30,13 @@ function msalGuardFactory(): MsalGuardConfiguration {
 function msalInterceptorFactory(): MsalInterceptorConfiguration {
   return {
     interactionType: InteractionType.Redirect,
-    protectedResourceMap: new Map([[environment.apiUrl, environment.azure.apiScopes]]),
+    // SIMPLIFICADO: en local (useGateway:false) el front llama directo a los MSs,
+    // asi que el mapa incluye sus URLs; apiUrl queda para la futura Gateway.
+    protectedResourceMap: new Map([
+      [environment.apiUrl, environment.azure.apiScopes],
+      [environment.productosUrl, environment.azure.apiScopes],
+      [environment.carritoUrl, environment.azure.apiScopes],
+    ]),
   };
 }
 
