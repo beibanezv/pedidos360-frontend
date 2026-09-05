@@ -80,7 +80,14 @@ export class AuthService {
   }
 
   logout(): void {
-    this.auth.logoutRedirect();
+    // SIMPLIFICADO: pasar la cuenta activa evita el selector de cuentas de Azure
+    // y vuelve directo al frontend.
+    const cuenta =
+      this.auth.instance.getActiveAccount() ?? this.auth.instance.getAllAccounts()[0];
+    this.auth.logoutRedirect({
+      account: cuenta,
+      postLogoutRedirectUri: environment.azure.redirectUri,
+    });
   }
 
   /** Recalcula sesión + claims (del access token) cuando cambia el estado MSAL. */
@@ -91,6 +98,7 @@ export class AuthService {
       this.claims.set({});
       return;
     }
+    this.auth.instance.setActiveAccount(account);
     try {
       const resultado = await firstValueFrom(
         this.auth.acquireTokenSilent({
