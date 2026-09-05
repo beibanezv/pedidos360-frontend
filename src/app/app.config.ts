@@ -32,11 +32,13 @@ function msalInterceptorFactory(): MsalInterceptorConfiguration {
     interactionType: InteractionType.Redirect,
     // SIMPLIFICADO: en local (useGateway:false) el front llama directo a los MSs,
     // asi que el mapa incluye sus URLs; apiUrl queda para la futura Gateway.
-    protectedResourceMap: new Map([
-      [environment.apiUrl, environment.azure.apiScopes],
-      [environment.productosUrl, environment.azure.apiScopes],
-      [environment.carritoUrl, environment.azure.apiScopes],
-    ]),
+    // msal-angular v6 usa strict matching (^...$ por componente de URL): la key debe
+    // terminar en /* para cubrir todas las rutas bajo esa base. Se omiten bases vacias.
+    protectedResourceMap: new Map(
+      [environment.apiUrl, environment.productosUrl, environment.carritoUrl]
+        .filter((base) => !!base)
+        .map((base) => [`${base}/*`, environment.azure.apiScopes] as [string, string[]]),
+    ),
   };
 }
 
