@@ -46,6 +46,10 @@ export class AuthService {
   readonly logueado = signal(this.auth.instance.getAllAccounts().length > 0);
   readonly claims = signal<TokenClaims>({});
 
+  // SIMPLIFICADO: sesión local solo UI (demo). No es un login real: no emite
+  // tokens ni desbloquea nada protegido (el carrito exige token de Azure).
+  readonly usuarioLocal = signal<string | null>(sessionStorage.getItem('p360-local'));
+
   readonly roles = computed(() => this.claims().roles ?? []);
   readonly esCliente = computed(() => this.roles().includes('Cliente'));
   readonly esAdmin = computed(() => this.roles().includes('Admin'));
@@ -61,7 +65,7 @@ export class AuthService {
   readonly nombre = computed(() => {
     this.logueado();
     const acc = this.auth.instance.getAllAccounts()[0];
-    return acc?.name || acc?.username || 'Usuario';
+    return acc?.name || acc?.username || this.usuarioLocal() || 'Usuario';
   });
 
   constructor() {
@@ -77,6 +81,18 @@ export class AuthService {
 
   login(): void {
     this.auth.loginRedirect();
+  }
+
+  /** Sesión local demo: solo abre la UI, no toca MSAL ni los guards. */
+  loginLocal(nombre: string): void {
+    const limpio = nombre.trim() || 'Invitado';
+    sessionStorage.setItem('p360-local', limpio);
+    this.usuarioLocal.set(limpio);
+  }
+
+  salirLocal(): void {
+    sessionStorage.removeItem('p360-local');
+    this.usuarioLocal.set(null);
   }
 
   logout(): void {

@@ -1,0 +1,24 @@
+<section class="wrap login">
+  <p class="eyebrow">Ingresar</p>
+  <h1>Tu cuenta</h1>
+  @if (auth.logueado()) {
+    <p class="lead">Ya iniciaste sesión con Microsoft como {{ auth.nombre() }}.</p>
+    <a routerLink="/cuenta" class="btn-primary">Ir a mi cuenta</a>
+  } @else {
+    <p class="lead">Explora el catálogo con una sesión local de demostración, o conecta tu cuenta Microsoft para comprar.</p>
+    <form class="login-form" (submit)="$event.preventDefault(); entrarLocal(usuario.value, clave.value)">
+      <label class="campo">
+        <span>Usuario</span>
+        <input #usuario name="usuario" type="text" autocomplete="username" placeholder="demo" />
+      </label>
+      <label class="campo">
+        <span>Clave</span>
+        <input #clave name="clave" type="password" autocomplete="current-password" placeholder="••••" />
+      </label>
+      <button type="submit" class="btn-ghost">Entrar (demo)</button>
+    </form>
+    <div class="login-divisor"><span>o</span></div>
+    <button type="button" class="btn-primary" (click)="auth.login()">Continuar con Microsoft</button>
+    <p class="login-nota">La sesión demo solo abre la interfaz. Agregar al carrito exige la cuenta Microsoft (el backend valida el token de Azure).</p>
+  }
+</section>

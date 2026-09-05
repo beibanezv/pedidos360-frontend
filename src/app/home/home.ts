@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { AuthService } from '../core/security/auth.service';
 import { ProductoArte } from '../core/components/producto-arte/producto-arte';
@@ -15,6 +16,7 @@ export class Home {
   private readonly productosService = inject(ProductoService);
   private readonly carrito = inject(CarritoService);
   private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
 
   protected readonly productos = signal<Producto[]>([]);
   protected readonly cargando = signal(true);
@@ -45,7 +47,7 @@ export class Home {
 
   agregar(producto: Producto): void {
     if (!this.auth.logueado()) {
-      this.auth.login();
+      this.router.navigate(['/login']);
       return;
     }
     this.carrito.agregarItem(producto).subscribe({

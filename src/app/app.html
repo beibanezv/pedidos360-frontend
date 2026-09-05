@@ -14,8 +14,11 @@
         }
         <a routerLink="/cuenta" class="btn-ghost">Mi cuenta</a>
         <button type="button" class="btn-ghost" (click)="auth.logout()">Salir</button>
+      } @else if (auth.usuarioLocal()) {
+        <span class="nav-user">{{ auth.usuarioLocal() }} (demo)</span>
+        <button type="button" class="btn-ghost" (click)="auth.salirLocal()">Salir</button>
       } @else {
-        <button type="button" class="btn-ghost" (click)="auth.login()">Ingresar</button>
+        <a routerLink="/login" class="btn-ghost">Ingresar</a>
       }
       <a class="cart" routerLink="/carrito"><span>Carrito</span><span class="cart-badge">{{ carrito.count() }}</span></a>
     </div>
