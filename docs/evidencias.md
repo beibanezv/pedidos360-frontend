@@ -83,16 +83,21 @@ URLs públicas (no son secretos):
 - API negocio: `https://13uwepgzy9.execute-api.us-east-1.amazonaws.com/desarrollo`
 
 - [x] **4 EC2 + RDS corriendo**
-  <!-- foto: evidencias/10-ec2-rds.png (consola EC2 con las 4 instancias running + RDS available) -->
+  ![docker ps en p360-productos](evidencias/10-ec2-productos.png)
+  ![docker ps en p360-carrito](evidencias/11-ec2-carrito.png)
+  ![docker ps en p360-login](evidencias/12-ec2-login.png)
+  ![docker ps en p360-frontend](evidencias/13-ec2-frontend.png)
+  ![RDS p360-postgres available](evidencias/14-rds-postgres.png)
   Qué demuestra: `p360-productos` (3.222.205.49:8081), `p360-carrito`
   (13.218.140.78:8082), `p360-login` (13.221.95.168:8083), `p360-frontend`
   (EIP 52.73.189.238:80), cada una con su contenedor Docker `Up`, y
   `p360-postgres` (db.t3.micro) en estado `available` con las 2 bases
   (`pedidos360_productos`, `pedidos360_carrito`).
-  Cómo repetirla: `docker ps` por SSH en cada EC2 + `describe-db-instances` en RDS.
+  Cómo repetirla: `sudo docker ps` por EC2 Instance Connect en cada EC2 +
+  consola RDS.
 
 - [x] **Gateway negocio: 18 rutas Método A + autorizador JWT nativo**
-  <!-- foto: evidencias/11-gateway-rutas.png (consola API Gateway con las rutas y el authorizer azure-ad) -->
+  <!-- foto: evidencias/15-gateway-rutas.png (consola API Gateway con las rutas y el authorizer azure-ad) -->
   Qué demuestra: HTTP API `p360-negocio` con rutas una-por-método
   (`GET /productos` pública; `POST/PUT/DELETE /productos/*`, `/carrito/*`,
   `/login/*` con JWT; 6 rutas `OPTIONS` sin autorizador para el preflight).
@@ -112,7 +117,7 @@ URLs públicas (no son secretos):
   Cómo repetirla: mismos `curl` sin header `Authorization`.
 
 - [x] **Rechazo por rol (403 del backend)**
-  <!-- foto: evidencias/12-403-cliente.png (consola: POST con token solo-Cliente → 403) -->
+  <!-- foto: evidencias/16-403-cliente.png (consola: POST con token solo-Cliente → 403) -->
   Qué demuestra: con token válido de cuenta solo-Cliente,
   `POST /desarrollo/productos` responde `403` (ms-productos exige rol Admin;
   el Gateway sí dejó pasar el token porque iss/aud/firma son válidos).
@@ -120,13 +125,13 @@ URLs públicas (no son secretos):
   caché MSAL (llave con `carrito.readwrite`) → `403`.
 
 - [x] **Escritura Admin (201) y catálogo actualizado (200)**
-  <!-- foto: evidencias/13-201-admin.png (red: POST 201 + GET 200 con el producto nuevo) -->
+  <!-- foto: evidencias/17-201-admin.png (red: POST 201 + GET 200 con el producto nuevo) -->
   Qué demuestra: con token de cuenta Admin, `OPTIONS → 200`, `POST → 201` y
   el `GET` siguiente trae el producto creado.
   Cómo repetirla: `/admin` con sesión Admin → crear producto → ver red + catálogo.
 
 - [x] **Login real en la URL https + `/cuenta` con claims**
-  <!-- foto: evidencias/14-cuenta-https.png (/cuenta con chips Cliente/Admin, scopes y sección ms-login) -->
+  <!-- foto: evidencias/18-cuenta-https.png (/cuenta con chips Cliente/Admin, scopes y sección ms-login) -->
   Qué demuestra: Authorization Code + PKCE contra el tenant del curso desde la
   URL https (redirect URI SPA registrada en Azure); `/cuenta` muestra nombre,
   roles, scopes y claims (`ver 1.0`, `iss sts.windows.net/...`, `aud api://...`).
