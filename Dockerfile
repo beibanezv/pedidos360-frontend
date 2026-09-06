@@ -7,7 +7,14 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
-RUN npm run build
+# SIMPLIFICADO: según versión/config el builder deja la app en dist/.../browser
+# (con prerender) o directo en dist/... ; se normaliza para que nginx sirva siempre
+# desde la raíz.
+RUN npm run build && \
+  if [ -d /app/dist/pedidos360-frontend/browser ]; then \
+    cp -r /app/dist/pedidos360-frontend/browser/* /app/dist/pedidos360-frontend/ && \
+    rm -rf /app/dist/pedidos360-frontend/browser /app/dist/pedidos360-frontend/prerendered-routes.json; \
+  fi && rm -f /app/dist/pedidos360-frontend/50x.html
 
 FROM nginx:alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
