@@ -9,9 +9,9 @@
 export const environment = {
   production: true,
   useGateway: true,
-  // Invoke URL del API Gateway (stage "prod"). Sin "/api": los resources del
-  // Gateway son /productos y /carrito (ver docs/aws-setup.md).
-  apiUrl: 'https://TODO-GATEWAY.execute-api.REGION.amazonaws.com/prod',
+  // Invoke URL del API Gateway de negocio (stage "desarrollo").
+  // Los resources del Gateway son /productos, /carrito y /login (ver docs/aws-setup.md).
+  apiUrl: 'https://13uwepgzy9.execute-api.us-east-1.amazonaws.com/desarrollo',
   productosUrl: '',
   carritoUrl: '',
   loginUrl: '',
@@ -19,7 +19,7 @@ export const environment = {
     clientId: '446c57cb-aba2-4b7a-ab01-6f2e6af7d35c',
     authority: 'https://login.microsoftonline.com/e5372bf0-c5e3-4286-887c-79069f209c1f',
     knownAuthorities: ['login.microsoftonline.com'],
-    redirectUri: 'http://localhost:4200', // TODO fase 3: URL https pública del frontend
+    redirectUri: 'https://4zg0frz1qg.execute-api.us-east-1.amazonaws.com/desarrollo', // URL https pública del frontend (vía Gateway)
     apiScopes: [
       'api://446c57cb-aba2-4b7a-ab01-6f2e6af7d35c/Productos.Read',
       'api://446c57cb-aba2-4b7a-ab01-6f2e6af7d35c/Carrito.ReadWrite',
