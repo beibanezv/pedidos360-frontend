@@ -12,6 +12,8 @@ export class ProductoService {
   // SIN interceptores. Con el MsalInterceptor (Redirect) un visitante anónimo
   // rebotaría al login de Microsoft apenas carga el Home.
   private readonly publicHttp = new HttpClient(inject(HttpBackend));
+  // La escritura (POST/PUT/DELETE) exige JWT: usa el cliente interceptado.
+  private readonly http = inject(HttpClient);
 
   /**
    * Si useGateway=true el catálogo se consume vía el API Gateway (un solo endpoint).
@@ -30,5 +32,20 @@ export class ProductoService {
         return of(PRODUCTOS_FALLBACK.map((raw) => new Producto(raw)));
       }),
     );
+  }
+
+  /** Crea un producto (ms-productos exige JWT; el id lo genera el backend). */
+  crear(datos: Omit<ProductoBackend, 'id'>): Observable<ProductoBackend> {
+    return this.http.post<ProductoBackend>(`${this.base}/productos`, datos);
+  }
+
+  /** Actualiza un producto existente (ms-productos exige JWT). */
+  actualizar(id: string, datos: Omit<ProductoBackend, 'id'>): Observable<ProductoBackend> {
+    return this.http.put<ProductoBackend>(`${this.base}/productos/${id}`, datos);
+  }
+
+  /** Elimina un producto (ms-productos exige JWT). */
+  eliminar(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/productos/${id}`);
   }
 }
