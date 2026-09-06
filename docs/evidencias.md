@@ -97,18 +97,21 @@ URLs públicas (no son secretos):
   consola RDS.
 
 - [x] **Gateway negocio: 18 rutas Método A + autorizador JWT nativo**
-  <!-- foto: evidencias/15-gateway-rutas.png (consola API Gateway con las rutas y el authorizer azure-ad) -->
+  ![Rutas del API p360-negocio](evidencias/15-gateway-rutas.png)
+  ![Authorizer azure-ad con issuer v1 y audience](evidencias/16-gateway-authorizers.png)
+  ![CORS restringido al origen del frontend](evidencias/17-gateway-cors.png)
   Qué demuestra: HTTP API `p360-negocio` con rutas una-por-método
   (`GET /productos` pública; `POST/PUT/DELETE /productos/*`, `/carrito/*`,
   `/login/*` con JWT; 6 rutas `OPTIONS` sin autorizador para el preflight).
   Authorizer `azure-ad`: issuer v1 `https://sts.windows.net/e5372bf0-c5e3-4286-887c-79069f209c1f/`
   (el token real es ver 1.0) y audience `api://446c57cb-aba2-4b7a-ab01-6f2e6af7d35c`.
   CORS cerrado al origen exacto del frontend (sin `*`).
-  Cómo repetirla: consola API Gateway → API `p360-negocio` → Routes + Authorizers + CORS.
+  Cómo repetirla: consola API Gateway → API `p360-negocio` → Routes + Authorization + CORS.
 
 - [x] **Catálogo público vía Gateway (200 sin token)**
+  ![GET /productos sin token responde 200](evidencias/18-catalogopublico-sintoken.png)
   Qué demuestra: `GET /desarrollo/productos` responde 200 con los 8 productos
-  sin Authorization (verificado con `curl`: `200`).
+  sin Authorization (verificado también con `curl`: `200`).
   Cómo repetirla: `curl https://13uwepgzy9.execute-api.us-east-1.amazonaws.com/desarrollo/productos`.
 
 - [x] **Rechazo sin token (401 del authorizer)**
@@ -117,21 +120,24 @@ URLs públicas (no son secretos):
   Cómo repetirla: mismos `curl` sin header `Authorization`.
 
 - [x] **Rechazo por rol (403 del backend)**
-  <!-- foto: evidencias/16-403-cliente.png (consola: POST con token solo-Cliente → 403) -->
+  ![POST con token solo-Cliente responde 403](evidencias/19-403-porRol.png)
   Qué demuestra: con token válido de cuenta solo-Cliente,
   `POST /desarrollo/productos` responde `403` (ms-productos exige rol Admin;
   el Gateway sí dejó pasar el token porque iss/aud/firma son válidos).
+  La misma captura muestra `/cuenta` con chip Cliente, scopes y claims
+  (`aud api://...`, `iss sts.windows.net/...` ver 1.0) más la sección
+  "Datos desde ms-login" (oid, nombre, correo, roles).
   Cómo repetirla: en consola con sesión solo-Cliente, POST con el token del
   caché MSAL (llave con `carrito.readwrite`) → `403`.
 
 - [x] **Escritura Admin (201) y catálogo actualizado (200)**
-  <!-- foto: evidencias/17-201-admin.png (red: POST 201 + GET 200 con el producto nuevo) -->
+  ![POST con token Admin responde 201](evidencias/20-escrituraAdmin.png)
   Qué demuestra: con token de cuenta Admin, `OPTIONS → 200`, `POST → 201` y
   el `GET` siguiente trae el producto creado.
   Cómo repetirla: `/admin` con sesión Admin → crear producto → ver red + catálogo.
 
 - [x] **Login real en la URL https + `/cuenta` con claims**
-  <!-- foto: evidencias/18-cuenta-https.png (/cuenta con chips Cliente/Admin, scopes y sección ms-login) -->
+  ![Mi cuenta en la URL https](evidencias/21-miCuenta.png)
   Qué demuestra: Authorization Code + PKCE contra el tenant del curso desde la
   URL https (redirect URI SPA registrada en Azure); `/cuenta` muestra nombre,
   roles, scopes y claims (`ver 1.0`, `iss sts.windows.net/...`, `aud api://...`).
@@ -140,10 +146,13 @@ URLs públicas (no son secretos):
   Cómo repetirla: abrir la URL https → Continuar con Microsoft → abrir Mi cuenta.
 
 - [x] **Frontend https detrás del Gateway (base /desarrollo/)**
-  Qué demuestra: `/desarrollo/`, `/desarrollo/catalogo` y los assets
-  (`main-*.js`) responden 200; el build prod usa `baseHref /desarrollo/` y
-  `apiUrl` del Gateway (la ruta sin slash da `Not Found` del API, esperado).
-  Cómo repetirla: abrir la URL https con la consola abierta (sin errores de la app).
+  ![Sin slash final: Not Found del API](evidencias/22-urlSinSlash.png)
+  ![Con slash final: la app carga](evidencias/23-urlConSlash.png)
+  Qué demuestra: `/desarrollo/` y `/desarrollo/catalogo` sirven la app y los
+  assets (`main-*.js`) responden 200; el build prod usa `baseHref /desarrollo/`
+  y `apiUrl` del Gateway. Sin slash final el path queda vacío y el API
+  responde `Not Found` (comportamiento esperado, no error).
+  Cómo repetirla: abrir la URL https con y sin slash con la consola abierta.
 
 ## 7. Problemas AWS encontrados y solución
 
