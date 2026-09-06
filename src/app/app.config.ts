@@ -35,7 +35,7 @@ function msalInterceptorFactory(): MsalInterceptorConfiguration {
     // msal-angular v6 usa strict matching (^...$ por componente de URL): la key debe
     // terminar en /* para cubrir todas las rutas bajo esa base. Se omiten bases vacias.
     protectedResourceMap: new Map(
-      [environment.apiUrl, environment.productosUrl, environment.carritoUrl]
+      [environment.apiUrl, environment.productosUrl, environment.carritoUrl, environment.loginUrl]
         .filter((base) => !!base)
         .map((base) => [`${base}/*`, environment.azure.apiScopes] as [string, string[]]),
     ),

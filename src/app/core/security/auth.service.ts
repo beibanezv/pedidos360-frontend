@@ -1,7 +1,8 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { InteractionStatus } from '@azure/msal-browser';
 import { MsalBroadcastService, MsalService } from '@azure/msal-angular';
-import { filter, firstValueFrom } from 'rxjs';
+import { filter, firstValueFrom, Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 
@@ -11,6 +12,15 @@ export interface TokenClaims {
   roles?: string[];
   scp?: string[] | string;
   [claim: string]: unknown;
+}
+
+/** Respuesta de GET /login/me (ms-login): el JWT decodificado en el backend. */
+export interface UsuarioLogin {
+  oid: string;
+  nombre: string | null;
+  correo: string | null;
+  roles: string[];
+  scopes: string[] | string;
 }
 
 /** Decodifica el payload de un JWT (parte [1]) sin librerías externas. */
@@ -42,6 +52,7 @@ function decodeJwtPayload(segment?: string): TokenClaims {
 export class AuthService {
   private readonly auth = inject(MsalService);
   private readonly broadcast = inject(MsalBroadcastService);
+  private readonly http = inject(HttpClient);
 
   readonly logueado = signal(this.auth.instance.getAllAccounts().length > 0);
   readonly claims = signal<TokenClaims>({});
@@ -81,6 +92,16 @@ export class AuthService {
 
   login(): void {
     this.auth.loginRedirect();
+  }
+
+  /**
+   * Pide a ms-login que decodifique el JWT (el interceptor adjunta el token).
+   * Demuestra que ms-login está en uso; si no responde, la cuenta sigue
+   * funcionando con los claims locales.
+   */
+  perfilLogin(): Observable<UsuarioLogin> {
+    const base = environment.useGateway ? environment.apiUrl : environment.loginUrl;
+    return this.http.get<UsuarioLogin>(`${base}/login/me`);
   }
 
   /** Sesión local demo: solo abre la UI, no toca MSAL ni los guards. */
