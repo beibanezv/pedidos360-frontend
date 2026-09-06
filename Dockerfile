@@ -9,7 +9,10 @@ RUN npm ci
 COPY . .
 # SIMPLIFICADO: según versión/config el builder deja la app en dist/.../browser
 # (con prerender) o directo en dist/... ; se normaliza para que nginx sirva siempre
-# desde la raíz.
+# desde la raíz. El baseHref /desarrollo/ (solo config production en angular.json)
+# es porque en AWS la app vive detrás del stage "desarrollo" del Gateway: sin esto
+# el router y los assets absolutos apuntarían fuera del stage y darían Not Found.
+# El `ng serve` local usa la config development y no se ve afectado.
 RUN npm run build && \
   if [ -d /app/dist/pedidos360-frontend/browser ]; then \
     cp -r /app/dist/pedidos360-frontend/browser/* /app/dist/pedidos360-frontend/ && \

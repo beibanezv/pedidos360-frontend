@@ -30,6 +30,7 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "/desarrollo/",
               "budgets": [
                 {
                   "type": "initial",
