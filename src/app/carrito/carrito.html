@@ -2,6 +2,12 @@
   <section class="carrito">
     <h1>Tu carrito</h1>
 
+    <!-- Fuera de la rama de items: tras el checkout el carrito queda vacío y el
+         mensaje de confirmación debe seguir visible. -->
+    @if (mensaje()) {
+      <p class="ok">{{ mensaje() }}</p>
+    }
+
     @if (cargando()) {
       <p class="lead">Cargando carrito…</p>
     } @else if (error()) {
@@ -10,10 +16,6 @@
       <p class="lead">Tu carrito está vacío.</p>
       <a routerLink="/" class="btn-primary">Ir al catálogo</a>
     } @else {
-      @if (mensaje()) {
-        <p class="ok">{{ mensaje() }}</p>
-      }
-
       <div class="rows">
         @for (v of itemsVista(); track v.item.id) {
           <div class="carrito-row">

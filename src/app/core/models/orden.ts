@@ -4,7 +4,8 @@
  */
 
 export interface OrdenDTO {
-  id: string;
+  /** ms-orders lo devuelve como "ordenId" (ver OrdenController.resumen). */
+  ordenId: string;
   usuarioId: string;
   totalClp: number;
   estado: string;
