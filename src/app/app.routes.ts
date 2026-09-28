@@ -6,6 +6,7 @@ import { Catalogo } from './catalogo/catalogo';
 import { Login } from './login/login';
 import { Cuenta } from './cuenta/cuenta';
 import { Carrito } from './carrito/carrito';
+import { Ordenes } from './ordenes/ordenes';
 import { Admin } from './admin/admin';
 import { adminGuard } from './core/security/admin.guard';
 
@@ -15,5 +16,6 @@ export const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'cuenta', component: Cuenta, canActivate: [MsalGuard] },
   { path: 'carrito', component: Carrito, canActivate: [MsalGuard] },
+  { path: 'ordenes', component: Ordenes, canActivate: [MsalGuard] },
   { path: 'admin', component: Admin, canActivate: [MsalGuard, adminGuard] },
 ];
