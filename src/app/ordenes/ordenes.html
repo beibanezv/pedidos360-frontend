@@ -1,0 +1,32 @@
+<main class="wrap">
+  <section class="carrito">
+    <h1>Mis órdenes</h1>
+
+    @if (cargando()) {
+      <p class="lead">Cargando tus órdenes…</p>
+    } @else if (error()) {
+      <p class="lead">{{ error() }}</p>
+    } @else if (!hayOrdenes()) {
+      <p class="lead">Todavía no tienes órdenes.</p>
+      <a routerLink="/catalogo" class="btn-primary">Ir al catálogo</a>
+    } @else {
+      <div class="rows">
+        @for (o of ordenes(); track o.id) {
+          <div class="carrito-row">
+            <div class="row-main">
+              <h3>Orden N° {{ numero(o.id) }}</h3>
+              <p class="artist">{{ itemsDe(o) }} ítems · {{ o.estado }}</p>
+            </div>
+            <div class="row-side">
+              <span class="row-price">{{ precio(o.totalClp) }}</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="actions">
+        <a routerLink="/catalogo" class="btn-ghost">Seguir comprando</a>
+      </div>
+    }
+  </section>
+</main>

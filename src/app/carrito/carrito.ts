@@ -99,7 +99,8 @@ export class Carrito {
   finalizarCompra(): void {
     this.carritoService.checkout().subscribe({
       next: (res) => {
-        this.mensaje.set(`Compra completada: ${res.itemsComprados} ítems por ${this.precio(res.totalClp)}.`);
+        const orden = res.ordenId ? ` Orden N° ${res.ordenId.slice(0, 8)}.` : '';
+        this.mensaje.set(`Compra completada: ${res.itemsComprados} ítems por ${this.precio(res.totalClp)}.${orden}`);
         this.cargar();
       },
       error: () => this.error.set('No se pudo completar la compra.'),

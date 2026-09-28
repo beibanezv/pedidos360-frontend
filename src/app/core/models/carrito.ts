@@ -26,6 +26,8 @@ export interface CheckoutDTO {
   itemsComprados: number;
   totalClp: number;
   estado: string;
+  /** UUID de la orden creada (ms-carrito lo genera al publicar orden.creada). */
+  ordenId?: string;
 }
 
 export function precioItem(item: CarritoItemDTO): number {

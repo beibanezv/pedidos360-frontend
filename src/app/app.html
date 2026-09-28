@@ -13,6 +13,7 @@
           <a routerLink="/admin" class="btn-ghost">Admin</a>
         }
         <a routerLink="/cuenta" class="btn-ghost">Mi cuenta</a>
+        <a routerLink="/ordenes" class="btn-ghost">Mis órdenes</a>
         <button type="button" class="btn-ghost" (click)="auth.logout()">Salir</button>
       } @else if (auth.usuarioLocal()) {
         <span class="nav-user">{{ auth.usuarioLocal() }} (demo)</span>
