@@ -11,11 +11,11 @@
       <a routerLink="/catalogo" class="btn-primary">Ir al catálogo</a>
     } @else {
       <div class="rows">
-        @for (o of ordenes(); track o.id) {
+        @for (o of ordenes(); track o.ordenId) {
           <div class="carrito-row">
             <div class="row-main">
-              <h3>Orden N° {{ numero(o.id) }}</h3>
-              <p class="artist">{{ itemsDe(o) }} ítems · {{ o.estado }}</p>
+              <h3>Orden N° {{ numero(o.ordenId) }}</h3>
+              <p class="artist">{{ itemsDe(o) }} {{ itemsDe(o) === 1 ? 'ítem' : 'ítems' }} · {{ o.estado }}</p>
             </div>
             <div class="row-side">
               <span class="row-price">{{ precio(o.totalClp) }}</span>

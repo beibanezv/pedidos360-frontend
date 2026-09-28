@@ -21,11 +21,21 @@ export class Ordenes {
 
   protected readonly precio = formatPrecio;
   protected readonly itemsDe = cantidadItemsOrden;
-  protected readonly numero = (id: string): string => id.slice(0, 8);
+  protected readonly numero = (id: string): string => (id ?? '').slice(0, 8);
 
   protected readonly hayOrdenes = computed(() => this.ordenes().length > 0);
 
   constructor() {
+    void this.cargar();
+  }
+
+  /**
+   * Los claims del access token se cargan de forma asíncrona (acquireTokenSilent),
+   * y al entrar por navegación SPA no pasa por el redirect de Azure. Sin esperar
+   * primero, `oid()` todavía es null y la vista quedaría en error.
+   */
+  private async cargar(): Promise<void> {
+    await this.auth.asegurarClaims();
     const oid = this.auth.oid();
     if (!oid) {
       this.cargando.set(false);
