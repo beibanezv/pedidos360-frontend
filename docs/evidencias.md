@@ -1,4 +1,4 @@
-# Registro de evidencias — Pedidos360 (EP1 / EP2)
+# Registro de evidencias — Pedidos360 (EP1 / EP2 + EP3 / EP4)
 
 Mini-informe del sistema funcionando. Cada punto tiene la foto que lo prueba,
 qué demuestra y cómo repetirlo. Sirve como anexo para AVA/email y como guion
@@ -164,3 +164,45 @@ URLs públicas (no son secretos):
 | 403 imposible de provocar | El `@PreAuthorize` de carrito era OR con el scope (todas las cuentas pasan) | Escritura de productos exige rol `Admin` (autorización por rol real) |
 | Frontend servía la página default de nginx | El build deja la app en `dist/.../browser` y el COPY apuntaba a la raíz | Normalización `browser/` en el Dockerfile |
 | Assets y rutas rotas tras el stage | Paths absolutos apuntaban fuera de `/desarrollo/` | `baseHref /desarrollo/` solo en config production |
+
+## 8. Checklist EP3 / EP4 — RabbitMQ
+
+Esta sección separa lo que ya está respaldado por capturas o verificaciones
+registradas de lo que todavía debe capturarse para la entrega. No reemplaza una
+demostración en vivo ni afirma que una evidencia pendiente ya exista.
+
+| Requisito de la pauta | Estado | Evidencia o acción pendiente |
+|---|---|---|
+| Dos nodos RabbitMQ formando un clúster | ✅ Verificado en local y AWS | Capturar `cluster_status` y la vista de nodos en RabbitMQ Management |
+| Exchanges `direct` y `topic` | ✅ Declarados en código | Capturar `p360.ordenes.exchange` como `direct` y `p360.eventos` como `topic` |
+| Tres colas con sus respectivas DLQ | ✅ Declaradas y probadas | Capturar las colas principales y DLQ con sus mensajes/consumidores |
+| ACK manual y manejo de errores | ✅ Implementado | Mostrar logs de ACK, reintento, error permanente y envío a DLQ |
+| Flujo `orden.creada` → `orden.registrada` | ✅ Verificado en vivo | Capturar el flujo o complementar la demo con la consola de RabbitMQ |
+| Stock descontado por `ms-productos` | ✅ Verificado en vivo | Capturar stock antes/después y el evento procesado |
+| `ms-auditoria` consumiendo con binding `#` | ✅ Verificado en vivo | Capturar evento y registro en `/auditoria` |
+| Notificación por correo desde evento RabbitMQ | ⚠️ Correo configurado; inbox pendiente | Confirmar recepción en Gmail y capturar la prueba |
+| Endpoint directo de notificaciones | ✅ Implementado | Ejecutar desde Postman/curl con destinatario de prueba y guardar respuesta |
+| `docker-compose` levantando RabbitMQ y servicios | ✅ Verificado en AWS | Capturar `docker compose ps` en `p360-rabbit` |
+
+### Comandos observacionales para la defensa
+
+Ejecutar solo después de levantar el entorno correspondiente. Estos comandos
+consultan estado; no crean, purgan ni eliminan recursos.
+
+```powershell
+# Estado de servicios en la EC2 de RabbitMQ
+docker compose ps
+
+# Estado del clúster y salud de cada nodo
+docker exec p360-rabbit-1 rabbitmq-diagnostics cluster_status
+docker exec p360-rabbit-1 rabbitmq-diagnostics status
+
+# Colas, consumidores y mensajes (Management API local)
+curl http://localhost:15672/api/queues
+
+# Exchanges declarados
+curl http://localhost:15672/api/exchanges
+```
+
+Para usar la Management API se requiere autenticación y el usuario configurado
+en el entorno. No guardar contraseñas en este documento ni en el repositorio.
