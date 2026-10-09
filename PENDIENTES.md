@@ -57,7 +57,7 @@
 8. **Guion de defensa EP4 + ensayo** (5-10 min, orden de los 11 puntos). Ya no está bloqueado por Cognito (implementado); falta fijar la decisión del ítem 1. *Bloqueador:* decisión del usuario.
 9. **`DELETE /bindings` en ms-admin**, si se quiere cumplir al pie la instrucción de EP3. *Bloqueador:* ninguno — mejora pequeña en `RabbitAdminController` + `RabbitAdminService` + su prueba. El indicador 6 no lo exige: opcional.
 10. **Callbacks de prod en Cognito.** El client `pedidos360-spa` solo tiene callbacks de `localhost:4200`; al desplegar el frontend hay que agregar la URL pública (+ su `/cognito/callback`) al client y al `environment.prod.ts` (hoy apunta al callback local). *Bloqueador:* tener la URL pública.
-11. **Entrega: subir a AVA + email al profe** con los enlaces de los 9 repos (antes del 15-10-2026). *Bloqueador:* conviene llegar con capturas y guion; no es bloqueo técnico.
+11. **Entrega: subir a AVA + email al profe** con los enlaces de los 10 repos (antes del 15-10-2026). *Bloqueador:* conviene llegar con capturas y guion; no es bloqueo técnico.
 
 ---
 
@@ -139,5 +139,5 @@ ng test               # 7 pruebas (app.spec.ts, producto.service.spec.ts, carrit
 - **Cada ruta del HTTP API tiene un solo authorizer.** Es la razón técnica detrás del orden obligatorio de Cognito y del porqué la Lambda es inevitable si se quiere un segundo proveedor.
 - **Los 5 microservicios nuevos** (orders, notificaciones, auditoría, admin, cupones) **no llevan Spring Security a propósito**: confían en el authorizer del Gateway. productos, carrito y login sí validan JWT internamente contra el JWKS **v1** de Azure. Decisión documentada; si Cognito va a llamar al Gateway, esos 3 servicios necesitan un segundo issuer.
 - **Material de clase utilizable** (`Material visto en clase/Unidad 2`): `2.3.1 RabbitMQ Cluster con Docker Compose.pdf` (clúster), `2.2.2 DLX y DLQ.pdf` y `2.2.3 políticas de retención y alertas.pdf` (DLQ), `2.2.1 publish/subscribe, acknowledgements y durabilidad.pdf` (ACK), `2.1.3 exchanges, bindings y routing keys.pdf` (topología), `Paso a paso autenticacion todo usuario con Cognito.docx` y `Validador de token con lambda y api Gateway.docx` (Cognito + Lambda), `PASO A PASO PARA ENVIO DE CORREOS.docx` (SMTP).
-- **Higiene:** hay un `ng-serve-mail.log` sin seguimiento en la raíz del frontend que el `.gitignore` no cubre (solo cubre `ng-serve.log`).
-- **Estado de los 9 repos:** todos tagueados y sincronizados con `origin/main` — frontend v1.2.1 (HEAD `272fe80`), productos v1.3.0, carrito v1.3.0, login v1.1.0, orders v1.2.0, notificaciones v1.1.0, auditoría v1.0.0, admin v1.0.0, cupones v1.1.0.
+- **Higiene:** los logs de `ng serve` quedan cubiertos por el patrón `ng-serve-*.log` del `.gitignore`; el `.env` (agregado hoy) también.
+- **Estado de los 10 repos:** todos tagueados y sincronizados con `origin/main` — frontend v1.3.0 (HEAD `176233e`), lambda-authorizer v1.0.0 (`e06ae24`), productos v1.3.0, carrito v1.3.0, login v1.1.0, orders v1.2.0, notificaciones v1.1.0, auditoría v1.1.0, admin v1.0.0, cupones v1.1.0.
