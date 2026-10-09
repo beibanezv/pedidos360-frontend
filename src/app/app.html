@@ -15,6 +15,10 @@
         <a routerLink="/cuenta" class="btn-ghost">Mi cuenta</a>
         <a routerLink="/ordenes" class="btn-ghost">Mis órdenes</a>
         <button type="button" class="btn-ghost" (click)="auth.logout()">Salir</button>
+      } @else if (cognito.logueadoCognito()) {
+        <a routerLink="/cuenta" class="btn-ghost">Mi cuenta</a>
+        <a routerLink="/ordenes" class="btn-ghost">Mis órdenes</a>
+        <button type="button" class="btn-ghost" (click)="cognito.salirLocal()">Salir</button>
       } @else if (auth.usuarioLocal()) {
         <span class="nav-user">{{ auth.usuarioLocal() }} (demo)</span>
         <button type="button" class="btn-ghost" (click)="auth.salirLocal()">Salir</button>

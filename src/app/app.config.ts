@@ -5,12 +5,13 @@ import {
   provideZoneChangeDetection,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withInterceptors, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { IPublicClientApplication, InteractionType, PublicClientApplication } from '@azure/msal-browser';
 import { MsalModule, MsalInterceptor, MsalInterceptorConfiguration, MsalGuardConfiguration } from '@azure/msal-angular';
 
 import { environment } from '../environments/environment';
 import { routes } from './app.routes';
+import { cognitoInterceptor } from './core/security/cognito.interceptor';
 
 function msalInstanceFactory(): IPublicClientApplication {
   return new PublicClientApplication({
@@ -53,6 +54,6 @@ export const appConfig: ApplicationConfig = {
       MsalModule.forRoot(msalInstanceFactory(), msalGuardFactory(), msalInterceptorFactory()),
     ),
     { provide: HTTP_INTERCEPTORS, useClass: MsalInterceptor, multi: true },
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withInterceptorsFromDi(), withInterceptors([cognitoInterceptor])),
   ],
 };

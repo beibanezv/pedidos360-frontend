@@ -26,4 +26,12 @@ export const environment = {
       'api://446c57cb-aba2-4b7a-ab01-6f2e6af7d35c/Carrito.ReadWrite',
     ],
   },
+  cognito: {
+    region: 'us-east-1',
+    userPoolId: 'us-east-1_AU4jqskhP',
+    clientId: '5ikmrldrcrkejq5d4v6bqcjo8f',
+    domain: 'https://pedidos360-312883060357.auth.us-east-1.amazoncognito.com',
+    redirectUri: 'http://localhost:4200/cognito/callback',
+    scopes: ['openid', 'email', 'profile'],
+  },
 };

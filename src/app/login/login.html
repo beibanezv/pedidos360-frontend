@@ -4,6 +4,10 @@
   @if (auth.logueado()) {
     <p class="lead">Ya iniciaste sesión con Microsoft como {{ auth.nombre() }}.</p>
     <a routerLink="/cuenta" class="btn-primary">Ir a mi cuenta</a>
+  } @else if (cognito.logueadoCognito()) {
+    <p class="lead">Sesión Cognito activa como {{ cognito.nombreCognito() }}.</p>
+    <a routerLink="/cuenta" class="btn-primary">Ir a mi cuenta</a>
+    <button type="button" class="btn-ghost" (click)="salirCognito()">Salir de Cognito</button>
   } @else {
     <p class="lead">Explora el catálogo con una sesión local de demostración, o conecta tu cuenta Microsoft para comprar.</p>
     <form class="login-form" (submit)="$event.preventDefault(); entrarLocal(usuario.value, clave.value)">
@@ -22,6 +26,10 @@
     <button type="button" class="btn-microsoft" (click)="auth.login()">
       <svg width="21" height="21" viewBox="0 0 21 21" aria-hidden="true"><rect x="0" y="0" width="10" height="10" fill="#F25022"/><rect x="11" y="0" width="10" height="10" fill="#7FBA00"/><rect x="0" y="11" width="10" height="10" fill="#00A4EF"/><rect x="11" y="11" width="10" height="10" fill="#FFB900"/></svg>
       <span>Continuar con Microsoft</span>
+    </button>
+    <div class="login-divisor"><span>o</span></div>
+    <button type="button" class="btn-ghost" (click)="entrarCognito()">
+      Continuar con Cognito
     </button>
     <p class="login-nota">La sesión demo solo abre la interfaz. Agregar al carrito exige la cuenta Microsoft (el backend valida el token de Azure).</p>
   }
