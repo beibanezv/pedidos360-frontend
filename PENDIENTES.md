@@ -62,6 +62,11 @@ Análisis cruzado entre los requerimientos (`Enunciado_Evaluacion_1.md`, `EP1_DS
 
 ### 3b. Si se agrega Cognito (tarea 2026-10-09)
 
+**Orden obligatorio: Lambda primero, login de Cognito después.**
+1. Lambda authorizer (REQUEST) + matriz verificada en el stage `desarrollo`: sin token 401, inválido 401, token Azure 200/403, token Cognito 200/403, `OPTIONS` 200, `GET /productos` público.
+2. **Gate:** no tocar el frontend hasta que esa matriz pase con ambos tipos de token.
+3. Recién entonces: segunda vía de login en el frontend + `environment.prod.ts`. Motivo: cada ruta del HTTP API tiene un solo authorizer, así que sin Lambda los tokens de Cognito se rechazan y el checkout se rompe; y si se cambia el issuer del nativo a Cognito, se rompe Azure.
+
 - El authorizer JWT nativo acepta **un solo issuer y un solo audience**, así que Azure + Cognito a la vez es imposible con el nativo: hace falta una **Lambda REQUEST authorizer**.
 - Debe detectar el proveedor leyendo `iss` del payload **sin verificar firma**: `https://cognito-idp.<region>.amazonaws.com/<userPoolId>` → JWKS del user pool (más `token_use`/`client_id`); `https://sts.windows.net/<tenant>/` → JWKS v1 de Azure + audience `api://446c57cb-aba2-4b7a-ab01-6f2e6af7d35c`.
 - Mantener la matriz: sin token → 401, inválido → 401, válido sin scope/rol → 403, `GET /productos` público sin token.
