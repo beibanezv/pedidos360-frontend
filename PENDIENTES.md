@@ -1,6 +1,6 @@
 # Pendientes Pedidos360 — EP3 / EP4 (RabbitMQ)
 
-**Última actualización: 2026-10-09 (sesión PM)** — Cognito implementado de punta a punta en sesión de hoy (Lambda dual + frontend segunda vía + gate en API demo). Auditado contra `Enunciado 2`, pauta **EP3** y pauta **EP4**.
+**Última actualización: 2026-10-09 (sesión noche)** — Cognito implementado de punta a punta (Lambda dual + frontend segunda vía + gate en API demo). Noche: creado el repo propio `pedidos360-lambda-authorizer` (Java del material de clase, valores reales, 39/39 tests, tag `v1.0.0`) y Rama `feature/cognito-fixes` en el frontend con el `state` de CSRF y el callback de producción. Auditado contra `Enunciado 2`, pauta **EP3** y pauta **EP4**.
 
 > Este archivo es el pendiente vivo del frontend de Pedidos360 para la evaluación 2 (EP3 encargo 12% + EP4 presentación 18%). La verdad del estado por fase vive en `ESTADO-EP3-EP4.md` (raíz del workspace) y en `AGENTS.md`; si algo de aquí contradice a esos dos, ganan ellos y este archivo está desactualizado.
 
@@ -25,7 +25,7 @@
 
 ---
 
-## Estado contra la pauta EP4 (10 puntos de la presentación)
+## Estado contra la pauta EP4 (11 puntos de la presentación)
 
 > La pauta EP4 usa la **misma tabla de 8 indicadores de arriba**; acá van los puntos de las "Instrucciones específicas" (el enunciado lista 11, no 10). La presentación es **individual**: cada integrante defiende el sistema completo.
 
@@ -49,7 +49,7 @@
 
 1. **Decidir la infra para la defensa.** El Lab reseteó la cuenta: no existen `13uwepgzy9`, las 4 EC2 ni el RDS (evidencia histórica en `docs/evidencias/` sigue válida como registro). Opciones: (a) reconstruir el API de negocio + backend antes de la entrega; (b) defender auth con la API demo `0kshk6n4yh` + evidencias históricas para el resto. *Bloqueador:* decisión + tiempo de Lab (la sesión actual termina 10:58 PDT).
 2. **Matriz viva con token Azure v1.0** contra la API demo (o la reconstruida): sin token 401, inválido 403, Azure válido 200/403, Cognito válido 200/403, `OPTIONS` 200, `GET /productos` 200. Cognito ya está verificado; falta Azure porque requiere login interactivo Microsoft. *Bloqueador:* ninguno técnico.
-3. **Elegir authorizer para la defensa (Node o Java).** Ambos verificados 3/3 en Lambda y en Gateway: `p360-dual-authorizer` (Node + `jose`, Azure v1+v2 + Cognito, en `GET /carrito`) y `p360-java-validador` (Java del material de clase `Validador de token con lambda y api Gateway.docx`, Azure v1 + Cognito, en `GET /ordenes`). El Java es el del material de clase — mejor para la defensa. *Bloqueador:* decisión.
+3. **Authorizer para la defensa: DECIDIDO → el Java** (`p360-java-validador`, el del material de clase `Validador de token con lambda y api Gateway.docx`, Azure v1 + Cognito). Su código ya está versionado en el repo propio **`pedidos360-lambda-authorizer`** (`beibanezv`, tag `v1.0.0`, 39/39 tests). El Node quedó solo como Lambda desplegada en la API demo. *Sin bloqueador.*
 4. **Capturas de evidencia RabbitMQ/AWS** — clúster de 2 nodos, exchanges, colas + DLQ, `docker compose ps` en la EC2, flujo completo del mensaje y correo recibido. *Bloqueador:* requiere sesión de Lab + (si se quiere en nube) reconstruir la EC2 `p360-rabbit`.
 5. **Captura del tenant de Entra ID con los usuarios registrados** (punto 5 de EP4). *Bloqueador:* ninguno — solo acceso al portal de Azure. Es la evidencia más barata de conseguir y hoy no está.
 6. **Prueba desde Postman a `POST /api/notificaciones/enviar` + captura del correo**, tal como pide el Enunciado 2. El endpoint existe y valida el DTO. *Bloqueador:* ninguno en local; para la captura en AWS se necesita el lab.
@@ -65,7 +65,7 @@
 
 Detalle completo en `brief-cognito-lambda-authorizer.md` (raíz del workspace). Estado:
 
-1. **Lambda authorizer: HECHO (dos).** (a) `p360-dual-authorizer` (Node.js, REQUEST payload 2.0, `jose`): lee `iss` sin verificar y delega — Cognito (`us-east-1_AU4jqskhP`, valida `token_use` + `aud`/`client_id`) y Azure v1 (`sts.windows.net/...`, JWKS v1, audience `api://446c57cb...`) + fallback v2. Código en `C:\Users\matia\AppData\Local\Temp\opencode\p360-authorizer\index.mjs`. (b) `p360-java-validador` (Java del material de clase `Validador de token con lambda y api Gateway.docx`, handler `com.lambda.validador.AuthorizerHandler::handleRequest`, `java21`): mismo multi-issuer, `application.yaml` adaptado a este tenant/pool (el del repo traía IDs placeholder y Azure solo v2; sus tests exigen proveedores `["azure","cognito"]`, por eso Azure quedó solo v1). Adjuntadas en la API demo `0kshk6n4yh`: Node en `GET /carrito`, Java en `GET /ordenes`; **no** en `GET /productos` ni `OPTIONS`. (El API original `13uwepgzy9` ya no existe por el reset del Lab.)
+1. **Lambda authorizer: HECHO (dos).** (a) `p360-dual-authorizer` (Node.js, REQUEST payload 2.0, `jose`): lee `iss` sin verificar y delega — Cognito (`us-east-1_AU4jqskhP`, valida `token_use` + `aud`/`client_id`) y Azure v1 (`sts.windows.net/...`, JWKS v1, audience `api://446c57cb...`) + fallback v2. Código del Node **perdido**: quedaba en el `%TEMP%` de la PC del compañero, que se borra al reiniciar, así que solo sobrevive como Lambda desplegada. (b) `p360-java-validador` (Java del material de clase `Validador de token con lambda y api Gateway.docx`, handler `com.lambda.validador.AuthorizerHandler::handleRequest`, `java21`): mismo multi-issuer, `application.yaml` adaptado a este tenant/pool (el del repo traía IDs placeholder y Azure solo v2; sus tests exigen proveedores `["azure","cognito"]`, por eso Azure quedó solo v1). **Es el que se defiende y su código está a salvo**: repo propio **`pedidos360-lambda-authorizer`** (GitHub `beibanezv`) con los valores reales, **39/39 tests verdes**, tag `v1.0.0`, y sin el `function.jar` de 26 MB (se genera con `mvn package`). Adjuntadas en la API demo `0kshk6n4yh`: Node en `GET /carrito`, Java en `GET /ordenes`; **no** en `GET /productos` ni `OPTIONS`. (El API original `13uwepgzy9` ya no existe por el reset del Lab.)
 2. **Gate: VERIFICADO con Cognito, FALTA Azure.** Demo `https://0kshk6n4yh.execute-api.us-east-1.amazonaws.com/desarrollo`: `GET /productos` sin token 200, `GET /carrito|/ordenes` sin token 401, token malo 403, token Cognito 200, `OPTIONS` 200. Falta la mitad Azure (token v1.0 interactivo).
 3. **Frontend: HECHO.** Segunda vía Cognito Hosted UI (Code + PKCE) conviviendo con MSAL: `CognitoAuthService`, `cognitoInterceptor`, `sesionGuard`, ruta `/cognito/callback`, botón en `/login`, header y `/cuenta` con rama por proveedor. Pool `us-east-1_AU4jqskhP`, client `5ikmrldrcrkejq5d4v6bqcjo8f`, dominio `pedidos360-312883060357.auth.us-east-1.amazoncognito.com`. Usuarios: `cliente@pedidos360.cl`, `test-cognito@pedidos360.cl`. Pool/domain/client verificables sin backend; el canje de código requiere `ng serve`.
 
