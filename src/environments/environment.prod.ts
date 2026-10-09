@@ -31,7 +31,11 @@ export const environment = {
     userPoolId: 'us-east-1_AU4jqskhP',
     clientId: '5ikmrldrcrkejq5d4v6bqcjo8f',
     domain: 'https://pedidos360-312883060357.auth.us-east-1.amazoncognito.com',
-    redirectUri: 'http://localhost:4200/cognito/callback',
+    // En producción el frontend se sirve con baseHref /desarrollo/, así que el
+    // callback vive bajo esa misma ruta. OJO: hay que registrar esta URL como
+    // "Callback URL" del cliente Cognito en AWS; si solo está localhost, el
+    // login desplegado no completa el canje.
+    redirectUri: 'https://4zg0frz1qg.execute-api.us-east-1.amazonaws.com/desarrollo/cognito/callback',
     scopes: ['openid', 'email', 'profile'],
   },
 };
