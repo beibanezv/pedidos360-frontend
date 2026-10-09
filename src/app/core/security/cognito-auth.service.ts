@@ -47,6 +47,7 @@ async function challengeOf(verifier: string): Promise<string> {
 const K_ID = 'p360-cognito-id';
 const K_ACCESS = 'p360-cognito-access';
 const K_VERIFIER = 'p360-cognito-verifier';
+const K_STATE = 'p360-cognito-state';
 
 /**
  * Segunda vía de login: Cognito Hosted UI (Authorization Code + PKCE).
@@ -70,6 +71,14 @@ export class CognitoAuthService {
     return environment.cognito;
   }
 
+  /**
+   * Token que se manda al Gateway. Es el id_token, no el access_token.
+   * SIMPLIFICADO: el access_token de Cognito no trae el claim `email` y
+   * ms-carrito lo necesita para saber a quién notificar la compra; el id_token
+   * sí lo trae. Camino de upgrade: pedir el scope `aws.cognito.signin.user.admin`
+   * o usar un app client con scopes propios, y mandar el access_token (que es
+   * el token pensado para llamar a un API).
+   */
   token(): string | null {
     return sessionStorage.getItem(K_ID);
   }
@@ -78,18 +87,28 @@ export class CognitoAuthService {
     const verifier = randomVerifier();
     sessionStorage.setItem(K_VERIFIER, verifier);
     const challenge = await challengeOf(verifier);
+    // El state protege el round-trip contra CSRF: se compara al volver del
+    // Hosted UI. Sin él, un código de autorización ajeno podría inyectarse.
+    const state = randomVerifier();
+    sessionStorage.setItem(K_STATE, state);
     const params = new URLSearchParams({
       client_id: this.cfg.clientId,
       response_type: 'code',
       scope: this.cfg.scopes.join(' '),
       redirect_uri: this.cfg.redirectUri,
+      state,
       code_challenge_method: 'S256',
       code_challenge: challenge,
     });
     window.location.href = `${this.cfg.domain}/login?${params.toString()}`;
   }
 
-  async completarLogin(code: string): Promise<void> {
+  async completarLogin(code: string, state?: string | null): Promise<void> {
+    const stateGuardado = sessionStorage.getItem(K_STATE);
+    sessionStorage.removeItem(K_STATE);
+    if (!state || state !== stateGuardado) {
+      throw new Error('State invalido: se descarta el codigo por posible CSRF');
+    }
     const verifier = sessionStorage.getItem(K_VERIFIER);
     if (!verifier) throw new Error('Sin code_verifier (reintenta el login)');
     const body = new URLSearchParams({
@@ -116,6 +135,7 @@ export class CognitoAuthService {
   logout(): void {
     sessionStorage.removeItem(K_ID);
     sessionStorage.removeItem(K_ACCESS);
+    sessionStorage.removeItem(K_STATE);
     this.logueadoCognito.set(false);
     this.claimsCognito.set({});
     const params = new URLSearchParams({
@@ -128,6 +148,7 @@ export class CognitoAuthService {
   salirLocal(): void {
     sessionStorage.removeItem(K_ID);
     sessionStorage.removeItem(K_ACCESS);
+    sessionStorage.removeItem(K_STATE);
     this.logueadoCognito.set(false);
     this.claimsCognito.set({});
   }

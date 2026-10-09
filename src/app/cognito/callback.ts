@@ -19,6 +19,7 @@ export class CognitoCallback implements OnInit {
 
   async ngOnInit(): Promise<void> {
     const code = this.route.snapshot.queryParamMap.get('code');
+    const state = this.route.snapshot.queryParamMap.get('state');
     const error = this.route.snapshot.queryParamMap.get('error');
     if (error) {
       this.mensaje.set(`Cognito devolvió error: ${error}`);
@@ -29,7 +30,7 @@ export class CognitoCallback implements OnInit {
       return;
     }
     try {
-      await this.cognito.completarLogin(code);
+      await this.cognito.completarLogin(code, state);
       this.router.navigate(['/cuenta']);
     } catch {
       this.mensaje.set('No se pudo canjear el código (revisa redirect URI y PKCE).');
