@@ -52,13 +52,20 @@ Análisis cruzado entre los requerimientos (`Enunciado_Evaluacion_1.md`, `EP1_DS
 
 **Rubro afectado:** Indicador 2 — BFF (40%)
 
-- [x] Lambda authorizer en `docs/lambda-authorizer/` (`jose`, JWKS de Azure: firma, `iss`, `aud`, expiración)
+- [x] Lambda authorizer en `docs/lambda-authorizer/` (`jose`, JWKS de Azure: firma, `iss`, `aud`, expiración) — quedó como **referencia no desplegada** de evaluación 1. NO está en producción. No sirve tal cual para el API actual porque (a) responde con política IAM, formato de **REST API**, mientras el API desplegado es **HTTP API** (una Lambda authorizer ahí debe ser tipo REQUEST payload 2.0 y responder `{ isAuthorized, context }`), y (b) valida el issuer en forma **v2.0** (`login.microsoftonline.com/<tenant>/v2.0`) cuando los tokens reales de este tenant son **v1.0** (`iss` = `https://sts.windows.net/<tenant>/`, JWKS en `<tenant>/discovery/keys`)
 - [x] Respuesta 401 (token ausente/inválido) y 403 (policy Deny sin scope/rol)
 - [x] Reglas por ruta: `/productos` GET público; escritura = scope `Productos.Read` o rol `Admin`; `/carrito*` = scope `Carrito.ReadWrite` o rol `Cliente`/`Admin`
-- [ ] Crear la Lambda y conectar JWKS/issuer/aud (paso 3 de `docs/aws-setup.md`)
-- [ ] Asociar el authorizer a los métodos del Gateway (paso 4–5 de `docs/aws-setup.md`)
+- [x] Authorizer JWT nativo del HTTP API en producción (API `13uwepgzy9`, stage `desarrollo`) con issuer v1 `https://sts.windows.net/e5372bf0-c5e3-4286-887c-79069f209c1f/` y audience `api://446c57cb-aba2-4b7a-ab01-6f2e6af7d35c`. La Lambda como tal sigue sin crearse (no se necesita mientras solo haya Azure)
+- [x] Authorizer asociado a los métodos del Gateway: las rutas seguras lo llevan adjunto; las rutas `OPTIONS` van **sin** authorizer a propósito (el authorizer interceptaba los preflight y rompía el CORS)
 
-> **Nota:** Los microservicios ya validan JWT internamente, pero el enunciado pide que la validación perimetral se haga en el Gateway.
+> **Nota:** Los microservicios también validan JWT internamente, pero la validación perimetral ya está resuelta en el Gateway (authorizer JWT nativo del HTTP API).
+
+### 3b. Si se agrega Cognito (tarea 2026-10-09)
+
+- El authorizer JWT nativo acepta **un solo issuer y un solo audience**, así que Azure + Cognito a la vez es imposible con el nativo: hace falta una **Lambda REQUEST authorizer**.
+- Debe detectar el proveedor leyendo `iss` del payload **sin verificar firma**: `https://cognito-idp.<region>.amazonaws.com/<userPoolId>` → JWKS del user pool (más `token_use`/`client_id`); `https://sts.windows.net/<tenant>/` → JWKS v1 de Azure + audience `api://446c57cb-aba2-4b7a-ab01-6f2e6af7d35c`.
+- Mantener la matriz: sin token → 401, inválido → 401, válido sin scope/rol → 403, `GET /productos` público sin token.
+- Redesplegar el stage después de adjuntarla, y verificar que las rutas `OPTIONS` sigan sin authorizer.
 
 ### 4. Conectar catálogo real al frontend
 
