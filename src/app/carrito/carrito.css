@@ -135,3 +135,27 @@
   align-items: center;
   gap: 14px;
 }
+
+.email-checkout {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--hair);
+}
+
+.email-checkout input {
+  padding: 10px 12px;
+  border: 1px solid var(--hair);
+  border-radius: 3px;
+  background: none;
+  color: var(--paper);
+  font: inherit;
+  max-width: 320px;
+}
+
+.email-checkout input:focus {
+  outline: none;
+  border-color: var(--copper);
+}

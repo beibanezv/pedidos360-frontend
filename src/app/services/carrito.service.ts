@@ -63,8 +63,9 @@ export class CarritoService {
     );
   }
 
-  checkout(): Observable<CheckoutDTO> {
-    return this.http.post<CheckoutDTO>(`${this.base}/carrito/checkout`, null).pipe(
+  checkout(email?: string): Observable<CheckoutDTO> {
+    const params = email ? { email } : undefined;
+    return this.http.post<CheckoutDTO>(`${this.base}/carrito/checkout`, null, { params }).pipe(
       tap(() => this.totalItems.set(0)),
     );
   }
