@@ -54,7 +54,7 @@ import { CognitoAuthService } from '../core/security/cognito-auth.service';
             }
           } @else {
             <h2 style="margin-top: 24px;">Datos desde ms-login</h2>
-            <p class="lead">ms-login solo decodifica JWT de Azure; con sesión Cognito no aplica. La validez del token Cognito está probada en el Gateway (matriz 401/403/200).</p>
+            <p class="lead">ms-login decodifica el JWT de tu sesión (Azure o Cognito) y devuelve oid, nombre, correo, roles y scopes.</p>
           }
 
           <table class="claims">
@@ -73,7 +73,7 @@ import { CognitoAuthService } from '../core/security/cognito-auth.service';
               y Productos.Read / Carrito.ReadWrite desde Azure AD.
             } @else {
               Revisa <code>sub</code>, <code>email</code> e <code>iss</code>: es el JWT de Cognito
-              (<code>https://cognito-idp.us-east-1.amazonaws.com/us-east-1_AU4jqskhP</code>).
+              (<code>https://cognito-idp.us-east-1.amazonaws.com/us-east-1_A8lrPsDta</code>).
             }
           </p>
         }
@@ -97,7 +97,9 @@ export class Cuenta implements OnInit {
   protected readonly errorPerfil = signal(false);
 
   ngOnInit(): void {
-    if (this.auth.logueado()) {
+    // Con cualquier sesión (Azure o Cognito) el interceptor adjunta el token
+    // y ms-login responde 200; sin sesión no se llama.
+    if (this.auth.logueado() || this.cognito.logueadoCognito()) {
       this.auth.perfilLogin().subscribe({
         next: (p) => this.perfil.set(p),
         error: () => this.errorPerfil.set(true),
