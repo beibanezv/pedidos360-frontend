@@ -5,6 +5,7 @@ import { formatPrecio } from '../core/models/producto';
 import { OrdenDTO, cantidadItemsOrden } from '../core/models/orden';
 import { OrdenService } from '../services/orden.service';
 import { AuthService } from '../core/security/auth.service';
+import { CognitoAuthService } from '../core/security/cognito-auth.service';
 
 @Component({
   selector: 'app-ordenes',
@@ -14,6 +15,7 @@ import { AuthService } from '../core/security/auth.service';
 export class Ordenes {
   private readonly ordenService = inject(OrdenService);
   private readonly auth = inject(AuthService);
+  private readonly cognito = inject(CognitoAuthService);
 
   protected readonly cargando = signal(true);
   protected readonly error = signal('');
@@ -33,10 +35,12 @@ export class Ordenes {
    * Los claims del access token se cargan de forma asíncrona (acquireTokenSilent),
    * y al entrar por navegación SPA no pasa por el redirect de Azure. Sin esperar
    * primero, `oid()` todavía es null y la vista quedaría en error.
+   * Con sesión solo-Cognito no hay `oid`: se usa el `sub` del id_token, que es
+   * el mismo identificador con el que ms-carrito guardó la compra.
    */
   private async cargar(): Promise<void> {
     await this.auth.asegurarClaims();
-    const oid = this.auth.oid();
+    const oid = this.auth.oid() ?? this.cognito.claimsCognito().sub ?? null;
     if (!oid) {
       this.cargando.set(false);
       this.error.set('No se pudo identificar tu sesión. Vuelve a ingresar.');
