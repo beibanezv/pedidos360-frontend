@@ -35,7 +35,7 @@
 | 2 | Configuración del API Manager para llamar al backend | **CUMPLIDO** | 15 integraciones nuevas 1:1 contra los 8 controllers + las 5 base reutilizadas (productos 44.203.235.220, carrito 3.88.84.104, login 3.85.212.235, resto 3.92.6.130). CORS cerrado al origen del frontend. |
 | 3 | Frontend consume endpoints vía el API Manager | **CUMPLIDO** | Verificado en vivo 2026-09-28: 2 compras reales desde el navegador del usuario (órdenes `852f8d9b` y `7e2030f1`, ambas REGISTRADA, stock descontado, carrito vaciado). Capturas `docs/evidencias/fase5/` y fase 6. |
 | 4 | API Manager valida JWT: rechaza inválidas, acepta correctas | **CUMPLIDO (matriz dual viva 2026-10-10)** | Sin token 401, token malo 403, `GET /productos` público 200, Azure válido 200, **Cognito válido 200** (carrito, login/me, auditoría, órdenes), `POST /productos` con Cognito 403 (sin `ROLE_Admin`, correcto), ruta inventada 404, `OPTIONS` 200 con ACAO. |
-| 5 | Creación del tenant en IDaaS y existencia de usuarios registrados | **PARCIAL — falta captura** | El tenant existe y hay login real verificado con 2 cuentas (`benjamin.ibanez@josecamposar.onmicrosoft.com` y la guest `be.ibanezv@duocuc.cl`). **No hay captura de la consola de Entra ID mostrando el tenant ni la lista de usuarios** en `docs/evidencias/`. No depende de AWS: se puede sacar en cualquier momento. |
+| 5 | Creación del tenant en IDaaS y existencia de usuarios registrados | **CUMPLIDO** | Captura del portal (tenant `josecamposar`) con `benjamin.ibanez@josecamposar.onmicrosoft.com` (Miembro) y `BENJAMIN ANTONIO IBANEZ VARGAS be.ibanezv_duocuc.cl#EXT#` (Invitado), recibida 2026-10-14; falta archivarla en `docs/evidencias/`. No depende de AWS. | |
 | 6 | Frontend usa OAuth 2.0/OIDC para obtener un JWT válido | **CUMPLIDO (doble vía viva)** | MSAL Angular con Authorization Code + PKCE; `sesionGuard` en `/cuenta`, `/carrito`, `/ordenes`, `/admin`; `MsalInterceptor` + `cognitoInterceptor` con `state` anti-CSRF. Segunda vía Cognito Hosted UI (PKCE) contra el **pool propio** `us-east-1_A8lrPsDta` (client `2ba1fjeai3c2i77sb5dpd7j91m`), callback `/cognito/callback` registrado en localhost y en prod. `ng build` + `ng test` 10/10 verdes. Usuarios: `cliente@pedidos360.cl`, `test-cognito@pedidos360.cl`. |
 | 7 | Backend y frontend desplegados, activos e integrados en la nube | **CUMPLIDO** | 2026-10-10: 5 EC2 (productos, carrito, login, frontend nginx con build v1.3.1, `p360-rabbit`) + RDS `p360-postgres` + pool Cognito + Lambda `p360-authorizer`, todo respondiendo. |
 | 8 | Dos nodos RabbitMQ configurados y en clúster | **CUMPLIDO en código y local / falta captura cloud** | `docker/rabbitmq-cluster/docker-compose.yml` (2 nodos, `rabbitmq:4.2-management`, mismo `RABBITMQ_ERLANG_COOKIE`) + `rabbitmq.conf`. Local: `cluster_status` muestra los 2 nodos. AWS: reportado "clúster rabbit@rabbitmq-1/2, 7 contenedores UP". |
@@ -45,15 +45,12 @@
 
 ---
 
-## Lo que falta (pendiente real — actualizado 2026-10-10)
+## Lo que falta (pendiente real — actualizado 2026-10-14 tarde)
 
-1. **Jubilar el authorizer nativo `azure-ad`.** Quedó definido pero sin rutas (es el rollback instantáneo). Diseño final: un solo authorizer dual. *Bloqueador:* ninguno — un comando cuando esté todo verde.
-2. **Captura del tenant de Entra ID con los usuarios registrados** (punto 5 de EP4). *Bloqueador:* ninguno — solo acceso al portal de Azure. Es la evidencia más barata que queda.
-3. **Prueba desde Postman a `POST /notificaciones/enviar` + captura del correo**, tal como pide el Enunciado 2 (vía gateway). *Bloqueador:* ninguno — el endpoint responde hoy.
-4. **Purgar las DLQ viejas** (`p360.stock.dlq`=2, `p360.notificaciones.dlq`=1, restos del 28-09) o dejarlas como evidencia del mecanismo. *Bloqueador:* ninguno.
-5. **Guion de defensa EP4 + ensayo** (5-10 min, orden de los 11 puntos, individual). *Bloqueador:* ninguno técnico.
-6. **Entrega: subir a AVA + email al profe** con los enlaces de los 10 repos (todos tageados al HEAD, ver Notas). *Bloqueador:* conviene llegar con capturas y guion; no es bloqueo técnico.
-7. **Subir el TTL del authorizer** (`p360-dual` quedó en 0 sin caché para las pruebas; producción usa 300). *Bloqueador:* ninguno.
+1. **Archivar las 3 capturas en `docs/evidencias/`** (tenant, Postman 202, correo DuocUC) + commit.
+2. **Guion de defensa EP4 + ensayo** (5-10 min, orden de los 11 puntos, individual). *Bloqueador:* ninguno.
+3. **Entrega: subir a AVA + email al profe** con los enlaces de los 10 repos (tags al HEAD, ver Notas). *Bloqueador:* ninguno.
+4. **Probar `migrar-lab-nuevo.ps1`** contra el lab nuevo cuando toque. *Bloqueador:* ninguno.
 
 ---
 
@@ -61,11 +58,11 @@
 
 Detalle completo en `brief-cognito-lambda-authorizer.md` (raíz del workspace). Estado:
 
-1. **Lambda authorizer: el Java del material de clase, con valores reales.** Repo propio **`pedidos360-lambda-authorizer`** (`beibanezv`, tag `v1.0.1`, 39/39 tests, sin el `function.jar` de 26 MB): Azure JWKS/issuer en **v1.0** (el repo base traia v2.0) + pool propio de Cognito. Desplegada como **`p360-authorizer`** (java21) y conectada al API de negocio como authorizer REQUEST **`p360-dual`** (payload 2.0, TTL 0 para las pruebas). El codigo Node no se reutilizo (politica IAM de REST API + issuer v2.0) y su copia del companero se perdio con su `%TEMP%`; la API demo `0kshk6n4yh` ya no existe. El nativo `azure-ad` quedo sin rutas como rollback.
+1. **Lambda authorizer: el Java del material de clase, con valores reales.** Repo propio **`pedidos360-lambda-authorizer`** (`beibanezv`, tag `v1.0.1`, 39/39 tests, sin el `function.jar` de 26 MB): Azure JWKS/issuer en **v1.0** (el repo base traia v2.0) + pool propio de Cognito. Desplegada como **`p360-authorizer`** (java21) y conectada al API de negocio como authorizer REQUEST **`p360-dual`** (payload 2.0, TTL 300). El codigo Node no se reutilizo (politica IAM de REST API + issuer v2.0) y su copia del companero se perdio con su `%TEMP%`; la API demo `0kshk6n4yh` ya no existe. El nativo `azure-ad` se jubilo (queda solo `p360-dual`).
 2. **Gate: VERIFICADO con ambos proveedores.** Invoke directo a la Lambda: Cognito `true`, Azure v1.0 `true`, sin token `false`. Matriz viva por el gateway: sin token 401, malo 403, `GET /productos` 200, Azure 200, Cognito 200, `POST /productos` con Cognito 403 (sin Admin, correcto), `OPTIONS` 200.
 3. **Frontend: doble via contra el pool propio.** `us-east-1_A8lrPsDta`, client `2ba1fjeai3c2i77sb5dpd7j91m`, dominio `pedidos360-945401641647.auth.us-east-1.amazoncognito.com` (el pool del companero era de su lab muerto). Callbacks de localhost **y** prod registrados en el client. Usuarios `cliente@pedidos360.cl`, `test-cognito@pedidos360.cl`. Mas `state` anti-CSRF y callback de prod (tag v1.3.0).
 4. **Backends con Spring Security: segundo issuer.** carrito/productos/login prueban Azure y recurren al JWKS del pool; Cognito mapea a `ROLE_Cliente`, el admin sigue solo-Azure. Tags carrito/productos **v1.3.2**, login **v1.1.2** (tests 15/15/6). Vivo: `GET /carrito` 200, `POST /carrito/items` 201, `GET /login/me` 200.
-5. **Rutas explicitas (fix del `{proxy+}` de la ev. 1).** 33 rutas 1:1 contra los 8 controllers, cero `{proxy+}` y cero `ANY`; ruta inventada responde 404.
+5. **Rutas explicitas (fix del `{proxy+}` de la ev. 1).** 34 rutas 1:1 contra los 8 controllers, cero `{proxy+}` y cero `ANY`; ruta inventada responde 404.
 
 **Por qué el orden no era negociable:** cada ruta de un HTTP API tiene **un solo** authorizer. El authorizer JWT nativo (`azure-ad`) acepta un issuer y un audience, así que sin Lambda los tokens de Cognito se rechazan y el checkout queda roto; y si se cambia el issuer del nativo a Cognito, se rompe Azure, que es lo que sostiene la evaluación 1.
 
