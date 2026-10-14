@@ -42,8 +42,7 @@ describe('CarritoService', () => {
     req.flush({ id: 'item-1' });
   });
 
-  it('obtenerCarrito actualiza el badge con la suma de cantidades', () => {
-    const carrito: CarritoDTO = {
+  it('obtenerCarrito actualiza el badge con la suma de cantidades', () => {    const carrito: CarritoDTO = {
       id: 'c-1',
       usuarioId: 'u-1',
       createdAt: '2026-09-04T00:00:00Z',
@@ -57,5 +56,21 @@ describe('CarritoService', () => {
     http.expectOne('http://localhost:8082/carrito').flush(carrito);
 
     expect(service.count()).toBe(5);
+  });
+
+  it('checkout con email lo manda como query param', () => {
+    service.checkout('a@b.cl').subscribe();
+
+    const req = http.expectOne('http://localhost:8082/carrito/checkout?email=a@b.cl');
+    expect(req.request.method).toBe('POST');
+    req.flush({ carritoId: 'c-1', usuarioId: 'u-1', itemsComprados: 1, totalClp: 100, estado: 'checkout_ok' });
+  });
+
+  it('checkout sin email no manda params', () => {
+    service.checkout().subscribe();
+
+    const req = http.expectOne('http://localhost:8082/carrito/checkout');
+    expect(req.request.method).toBe('POST');
+    req.flush({ carritoId: 'c-1', usuarioId: 'u-1', itemsComprados: 1, totalClp: 100, estado: 'checkout_ok' });
   });
 });

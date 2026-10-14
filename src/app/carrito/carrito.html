@@ -52,6 +52,14 @@
         <a routerLink="/" class="btn-ghost">Seguir comprando</a>
         <button type="button" class="btn-primary" (click)="finalizarCompra()">Finalizar compra</button>
       </div>
+
+      @if (pideEmail()) {
+        <div class="email-checkout">
+          <p class="lead">Tu cuenta no trae correo: ¿a dónde enviamos la confirmación?</p>
+          <input type="email" placeholder="tu@correo.cl" [value]="emailCompra()" (input)="emailCompra.set($any($event.target).value)" />
+          <button type="button" class="btn-primary" (click)="confirmarConEmail()">Confirmar compra</button>
+        </div>
+      }
     }
   </section>
 </main>
