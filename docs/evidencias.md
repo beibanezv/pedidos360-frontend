@@ -180,8 +180,8 @@ demostración en vivo ni afirma que una evidencia pendiente ya exista.
 | Flujo `orden.creada` → `orden.registrada` | ✅ Verificado en vivo | Capturar el flujo o complementar la demo con la consola de RabbitMQ |
 | Stock descontado por `ms-productos` | ✅ Verificado en vivo | Capturar stock antes/después y el evento procesado |
 | `ms-auditoria` consumiendo con binding `#` | ✅ Verificado en vivo | Capturar evento y registro en `/auditoria` |
-| Notificación por correo desde evento RabbitMQ | ⚠️ Correo configurado; inbox pendiente | Confirmar recepción en Gmail y capturar la prueba |
-| Endpoint directo de notificaciones | ✅ Implementado | Ejecutar desde Postman/curl con destinatario de prueba y guardar respuesta |
+| Notificación por correo desde evento RabbitMQ | ✅ Recibido en DuocUC + Postman 202 (ver secc. 9) | — |
+| Endpoint directo de notificaciones | ✅ Ejecutado (202 + `correo_aceptado`, ver secc. 9) | — |
 | `docker-compose` levantando RabbitMQ y servicios | ✅ Verificado en AWS | Capturar `docker compose ps` en `p360-rabbit` |
 
 ### Comandos observacionales para la defensa
@@ -206,3 +206,30 @@ curl http://localhost:15672/api/exchanges
 
 Para usar la Management API se requiere autenticación y el usuario configurado
 en el entorno. No guardar contraseñas en este documento ni en el repositorio.
+
+## 9. EP3/EP4: flujo en navegador + doble vía + evidencias finales (2026-10-14)
+
+Flujo completo en Chromium con login Azure real (fase 5, local): home logueado,
+cuenta con roles/scopes, catálogo, agregado al carrito, carrito, checkout con
+N° de orden y vista de mis órdenes.
+
+![Home logueado](evidencias/fase5/01-home-logueado.png)
+![Cuenta con roles y scopes](evidencias/fase5/02-cuenta-roles-scopes.png)
+![Catálogo](evidencias/fase5/03-catalogo.png)
+![Agregado al carrito](evidencias/fase5/04-agregado-al-carrito.png)
+![Carrito](evidencias/fase5/05-carrito.png)
+![Checkout](evidencias/fase5/06-checkout.png)
+![Mis órdenes](evidencias/fase5/07-mis-ordenes.png)
+
+Falla conocida del Gateway de frontend (ya corregida con la ruta `$default`):
+abrir la URL sin slash devolvía `{"message":"Not Found"}`.
+
+![Login fallido sin slash](evidencias/fase6/00-login-fallido.png)
+
+Cierre de evidencias: tenant Entra ID con las dos cuentas, prueba Postman
+directa a `/notificaciones/enviar` (202 + `correo_aceptado`) y el correo
+recibido en la bandeja DuocUC.
+
+![Tenant Entra ID con usuarios](evidencias/entraid-tenant-usuarios.png)
+![Postman a notificaciones](evidencias/postman-notificaciones.png)
+![Correo recibido](evidencias/correo-postman.png)
