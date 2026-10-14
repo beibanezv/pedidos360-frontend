@@ -127,7 +127,7 @@ export class Carrito {
     if (this.cognito.logueadoCognito()) {
       return this.cognito.claimsCognito().email ?? null;
     }
-    const mail = this.auth.claims().email ?? this.auth.claims().preferred_username;
+    const mail = this.auth.claims()['email'] ?? this.auth.claims()['preferred_username'];
     return typeof mail === 'string' && mail ? mail : null;
   }
 
