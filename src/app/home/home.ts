@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { AuthService } from '../core/security/auth.service';
+import { CognitoAuthService } from '../core/security/cognito-auth.service';
 import { ProductoArte } from '../core/components/producto-arte/producto-arte';
 import { Producto, formatPrecio } from '../core/models/producto';
 import { CarritoService } from '../services/carrito.service';
@@ -16,6 +17,7 @@ export class Home {
   private readonly productosService = inject(ProductoService);
   private readonly carrito = inject(CarritoService);
   private readonly auth = inject(AuthService);
+  private readonly cognito = inject(CognitoAuthService);
   private readonly router = inject(Router);
 
   protected readonly productos = signal<Producto[]>([]);
@@ -46,7 +48,8 @@ export class Home {
   }
 
   agregar(producto: Producto): void {
-    if (!this.auth.logueado()) {
+    // Cualquiera de las dos sesiones vale (igual que en el catálogo).
+    if (!this.auth.logueado() && !this.cognito.logueadoCognito()) {
       // Sin sesión: el POST sale sin token y el backend responde 401 genuino,
       // que queda visible en consola como evidencia; luego se redirige a /login.
       this.carrito.agregarInvitado(producto).subscribe({
