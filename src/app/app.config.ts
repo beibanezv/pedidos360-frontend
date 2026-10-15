@@ -5,12 +5,13 @@ import {
   provideZoneChangeDetection,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withInterceptorsFromDi, withInterceptors, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { IPublicClientApplication, InteractionType, PublicClientApplication } from '@azure/msal-browser';
-import { MsalModule, MsalInterceptor, MsalInterceptorConfiguration, MsalGuardConfiguration } from '@azure/msal-angular';
+import { MsalModule, MsalInterceptorConfiguration, MsalGuardConfiguration } from '@azure/msal-angular';
 
 import { environment } from '../environments/environment';
 import { routes } from './app.routes';
+import { azureInterceptor } from './core/security/azure.interceptor';
 import { cognitoInterceptor } from './core/security/cognito.interceptor';
 
 function msalInstanceFactory(): IPublicClientApplication {
@@ -48,12 +49,15 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    // MsalModule.forRoot registra MsalService/Guard/Broadcast pero NO el interceptor:
-    // HTTP_INTERCEPTORS se registra aparte para que MsalInterceptor adjunte el JWT.
+    // MsalModule.forRoot registra MsalService/Guard/Broadcast. El interceptor de
+    // clase (MsalInterceptor) se eliminó a propósito: ante un 401/403 disparaba
+    // el login Redirect de Azure aunque el request llevara token de Cognito
+    // (o ninguno), secuestrando esas sesiones. En su lugar van dos
+    // interceptores funcionales que solo adjuntan y nunca redirigen:
+    // azureInterceptor (si hay cuenta MSAL) y luego cognitoInterceptor.
     importProvidersFrom(
       MsalModule.forRoot(msalInstanceFactory(), msalGuardFactory(), msalInterceptorFactory()),
     ),
-    { provide: HTTP_INTERCEPTORS, useClass: MsalInterceptor, multi: true },
-    provideHttpClient(withInterceptorsFromDi(), withInterceptors([cognitoInterceptor])),
+    provideHttpClient(withInterceptors([azureInterceptor, cognitoInterceptor])),
   ],
 };
