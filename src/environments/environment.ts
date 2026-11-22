@@ -16,6 +16,9 @@ export const environment = {
   carritoUrl: 'http://localhost:8082',
   loginUrl: 'http://localhost:8083',
   ordenesUrl: 'http://localhost:8084',
+  pagosUrl: 'http://localhost:8089',
+  analyticsUrl: 'http://localhost:8090',
+  metricasWsUrl: 'ws://localhost:8090/ws/metricas',
   azure: {
     clientId: '446c57cb-aba2-4b7a-ab01-6f2e6af7d35c',
     authority: 'https://login.microsoftonline.com/e5372bf0-c5e3-4286-887c-79069f209c1f',

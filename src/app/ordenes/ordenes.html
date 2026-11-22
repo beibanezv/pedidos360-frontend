@@ -1,26 +1,59 @@
 <main class="wrap">
-  <section class="carrito">
+  <section class="carrito ordenes">
     <h1>Mis órdenes</h1>
 
     @if (cargando()) {
       <p class="lead">Cargando tus órdenes…</p>
     } @else if (error()) {
-      <p class="lead">{{ error() }}</p>
-    } @else if (!hayOrdenes()) {
+      <p class="lead" role="alert">{{ error() }}</p>
+      <button type="button" class="btn-ghost" (click)="cargar()">Reintentar</button>
+    } @else if (!ordenes().length) {
       <p class="lead">Todavía no tienes órdenes.</p>
       <a routerLink="/catalogo" class="btn-primary">Ir al catálogo</a>
     } @else {
       <div class="rows">
         @for (o of ordenes(); track o.ordenId) {
+          <article class="orden">
           <div class="carrito-row">
             <div class="row-main">
-              <h3>Orden N° {{ numero(o.ordenId) }}</h3>
+              <h2>Orden N° {{ numero(o.ordenId) }}</h2>
               <p class="artist">{{ itemsDe(o) }} {{ itemsDe(o) === 1 ? 'ítem' : 'ítems' }} · {{ o.estado }}</p>
             </div>
             <div class="row-side">
               <span class="row-price">{{ precio(o.totalClp) }}</span>
             </div>
           </div>
+          <details #panel (toggle)="panel.open && !pagos()[o.ordenId] && cargarPago(o.ordenId)">
+            <summary>Pago de prueba</summary>
+            @let estadoPago = pagos()[o.ordenId];
+            <p class="pago-estado" role="status">
+              @if (estadoPago?.ocupado) { Consultando… }
+              @else if (estadoPago?.error) { {{ estadoPago?.error }} }
+              @else {
+                @switch (estadoPago?.pago?.resultado) {
+                  @case ('APROBADO') { Pago aprobado. No se hizo ningún cobro real. }
+                  @case ('RECHAZADO') { Pago rechazado en la simulación. }
+                  @case ('BLOQUEADO') { Bloqueado por varios intentos seguidos. Espera 10 segundos. }
+                  @default { Sin pago registrado. No ingreses datos de una tarjeta real. }
+                }
+              }
+            </p>
+            @if (estadoPago?.error) {
+              <button type="button" class="btn-ghost" (click)="cargarPago(o.ordenId)">Consultar estado</button>
+            } @else if (estadoPago?.pago?.resultado !== 'APROBADO') {
+              <div class="pago-controles">
+                <label>Tarjeta de prueba
+                  <select #tarjeta [disabled]="!estadoPago || estadoPago.ocupado">
+                    <option value="APROBACION">Aprueba el pago</option>
+                    <option value="RECHAZO">Rechaza el pago</option>
+                  </select>
+                </label>
+                <button type="button" class="btn-primary" [disabled]="!estadoPago || estadoPago.ocupado"
+                  (click)="pagar(o.ordenId, tarjeta.value)">Simular pago</button>
+              </div>
+            }
+          </details>
+          </article>
         }
       </div>
 

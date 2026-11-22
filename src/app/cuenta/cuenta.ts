@@ -3,10 +3,11 @@ import { JsonPipe } from '@angular/common';
 
 import { AuthService, UsuarioLogin } from '../core/security/auth.service';
 import { CognitoAuthService } from '../core/security/cognito-auth.service';
+import { MetricasPanel } from './metricas-panel';
 
 @Component({
   selector: 'app-cuenta',
-  imports: [JsonPipe],
+  imports: [JsonPipe, MetricasPanel],
   template: `
     <main class="wrap">
       <section class="cuenta">
@@ -33,6 +34,10 @@ import { CognitoAuthService } from '../core/security/cognito-auth.service';
             </p>
           } @else {
             <p class="lead">Sesión Cognito válida (JWT del User Pool). Cognito no usa roles ni scopes de Azure: el authorizer del Gateway la acepta como comprador.</p>
+          }
+
+          @if (esAzure() && auth.roles().includes('Admin')) {
+            <app-metricas-panel />
           }
 
           @if (esAzure()) {

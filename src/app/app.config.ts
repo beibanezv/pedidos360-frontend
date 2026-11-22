@@ -13,6 +13,7 @@ import { environment } from '../environments/environment';
 import { routes } from './app.routes';
 import { azureInterceptor } from './core/security/azure.interceptor';
 import { cognitoInterceptor } from './core/security/cognito.interceptor';
+import { apiBases } from './core/security/api-bases';
 
 function msalInstanceFactory(): IPublicClientApplication {
   return new PublicClientApplication({
@@ -37,9 +38,7 @@ function msalInterceptorFactory(): MsalInterceptorConfiguration {
     // msal-angular v6 usa strict matching (^...$ por componente de URL): la key debe
     // terminar en /* para cubrir todas las rutas bajo esa base. Se omiten bases vacias.
     protectedResourceMap: new Map(
-      [environment.apiUrl, environment.productosUrl, environment.carritoUrl, environment.loginUrl, environment.ordenesUrl]
-        .filter((base) => !!base)
-        .map((base) => [`${base}/*`, environment.azure.apiScopes] as [string, string[]]),
+      apiBases.map((base) => [`${base}/*`, environment.azure.apiScopes] as [string, string[]]),
     ),
   };
 }

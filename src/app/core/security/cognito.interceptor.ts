@@ -1,7 +1,7 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 
-import { environment } from '../../../environments/environment';
+import { esApi } from './api-bases';
 import { CognitoAuthService } from './cognito-auth.service';
 
 /**
@@ -9,12 +9,7 @@ import { CognitoAuthService } from './cognito-auth.service';
  * y MSAL no ya puso un Authorization (segunda vía de login).
  */
 export const cognitoInterceptor: HttpInterceptorFn = (req, next) => {
-  if (req.headers.has('Authorization')) return next(req);
-  const url = req.url;
-  const bases = [environment.apiUrl, environment.productosUrl, environment.carritoUrl, environment.loginUrl, environment.ordenesUrl].filter(
-    (b) => !!b,
-  );
-  if (!bases.some((b) => url.startsWith(b as string))) return next(req);
+  if (req.headers.has('Authorization') || !esApi(req.url)) return next(req);
   const token = inject(CognitoAuthService).token();
   if (!token) return next(req);
   return next(req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }));

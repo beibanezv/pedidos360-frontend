@@ -1,0 +1,50 @@
+.ordenes {
+  max-width: 840px;
+}
+
+.orden {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--hair);
+}
+
+.orden .carrito-row {
+  padding: 0;
+  border: 0;
+}
+
+.pago-estado {
+  margin: 8px 0;
+  color: var(--paper-dim);
+  font-size: .875rem;
+}
+
+.pago-controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.pago-controles label {
+  display: grid;
+  gap: 5px;
+  font-size: .875rem;
+}
+
+.pago-controles select {
+  background: var(--panel);
+  color: var(--paper);
+  border: 1px solid var(--hair);
+  border-radius: 3px;
+  padding: 9px 12px;
+  font: inherit;
+}
+
+.pago-controles button:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+.ordenes .actions {
+  margin-top: 24px;
+}

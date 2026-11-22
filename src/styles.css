@@ -105,7 +105,9 @@ nav.topbar{
 }
 
 @media (max-width: 760px){
-  .nav-links{ display:none; }
+  .topbar-inner{ flex-wrap:wrap; justify-content:flex-start; gap:12px 20px; padding:14px 16px; }
+  .nav-actions{ flex:1 0 100%; flex-wrap:wrap; gap:8px 12px; }
+  .nav-actions .btn-ghost{ padding-inline:10px; }
 }
 
 /* ---------- hero ---------- */

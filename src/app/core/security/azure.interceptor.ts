@@ -1,9 +1,10 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { MsalService } from '@azure/msal-angular';
-import { catchError, switchMap } from 'rxjs';
+import { catchError, of, switchMap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+import { esApi } from './api-bases';
 
 /**
  * Adjunta el access token de Azure solo cuando hay cuenta MSAL.
@@ -16,26 +17,13 @@ import { environment } from '../../../environments/environment';
  * el error se muestra en la UI para re-loguearse a mano.
  */
 export const azureInterceptor: HttpInterceptorFn = (req, next) => {
-  if (req.headers.has('Authorization')) return next(req);
+  if (req.headers.has('Authorization') || !esApi(req.url)) return next(req);
   const msal = inject(MsalService);
   const cuentas = msal.instance.getAllAccounts();
   if (cuentas.length === 0) return next(req);
-  const scopes = scopesPara(req.url);
-  if (!scopes) return next(req);
   const cuenta = msal.instance.getActiveAccount() ?? cuentas[0];
-  return msal.acquireTokenSilent({ scopes, account: cuenta }).pipe(
-    switchMap((res) => next(req.clone({ setHeaders: { Authorization: `Bearer ${res.accessToken}` } }))),
-    catchError(() => next(req)),
+  return msal.acquireTokenSilent({ scopes: environment.azure.apiScopes, account: cuenta }).pipe(
+    catchError(() => of(null)),
+    switchMap((res) => next(res ? req.clone({ setHeaders: { Authorization: `Bearer ${res.accessToken}` } }) : req)),
   );
 };
-
-function scopesPara(url: string): string[] | null {
-  const bases = [
-    environment.apiUrl,
-    environment.productosUrl,
-    environment.carritoUrl,
-    environment.loginUrl,
-    environment.ordenesUrl,
-  ].filter((b) => !!b);
-  return bases.some((b) => url.startsWith(b)) ? environment.azure.apiScopes : null;
-}

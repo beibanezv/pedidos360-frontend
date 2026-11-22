@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { ProductoService } from './producto.service';
@@ -11,7 +11,12 @@ describe('ProductoService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        provideHttpClient(withInterceptors([(req, next) => next(req.clone({
+          setHeaders: { Authorization: 'Bearer sesion-demo' },
+        }))])),
+        provideHttpClientTesting(),
+      ],
     });
     service = TestBed.inject(ProductoService);
     http = TestBed.inject(HttpTestingController);
@@ -44,6 +49,14 @@ describe('ProductoService', () => {
     const req = http.expectOne('http://localhost:8081/productos?categoria=tornamesa');
     expect(req.request.params.get('categoria')).toBe('tornamesa');
     req.flush([]);
+  });
+
+  it('consulta detalle con el cliente autenticado para el historial', () => {
+    service.getDetalle('id-1').subscribe((producto) => expect(producto.titulo).toBe('Nocturno'));
+
+    const req = http.expectOne('http://localhost:8081/productos/id-1');
+    expect(req.request.headers.get('Authorization')).toBe('Bearer sesion-demo');
+    req.flush({ id: 'id-1', nombre: 'Nocturno', artistaOMarca: 'Ana', categoria: 'vinilo', precioClp: 19990, stock: 4 });
   });
 
   it('usa catálogo mockeado si la API falla', () => {

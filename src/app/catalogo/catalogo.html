@@ -20,7 +20,8 @@
               <app-producto-arte [arte]="p.arte" [fondo]="p.fondo" [acento]="p.acento" />
             </div>
             <div class="info">
-              <h3>{{ p.titulo }}</h3>
+               <h3><button type="button" class="detalle-boton" aria-haspopup="dialog"
+                 (click)="abrirDetalle(p, dialogo)">{{ p.titulo }}</button></h3>
               <p class="artist">{{ p.artista }}</p>
               <div class="row">
                 <span class="price">{{ precio(p.precio) }}</span>
@@ -37,4 +38,55 @@
     }
   </section>
 
+  @if (enSesion()) {
+    <section class="recomendaciones" aria-labelledby="recomendaciones-titulo">
+      <div class="section-head">
+        <h2 id="recomendaciones-titulo">Recomendados para ti</h2>
+        <button type="button" class="btn-ghost" [disabled]="estadoRecomendados() === 'cargando'"
+          (click)="actualizarRecomendaciones()">Actualizar</button>
+      </div>
+      @switch (estadoRecomendados()) {
+        @case ('cargando') { <p class="lead" role="status">Buscando recomendaciones…</p> }
+        @case ('error') { <p class="lead" role="status">No pudimos cargar tus recomendaciones. Intenta actualizar.</p> }
+        @case ('listo') {
+          @if (recomendados().length) {
+            <p class="lead">Según los productos que has consultado.</p>
+            <ul>
+              @for (p of recomendados(); track p.id) {
+                <li>
+                  <button type="button" class="detalle-boton" aria-haspopup="dialog"
+                    (click)="abrirDetalle(p, dialogo)">{{ p.titulo }}</button>
+                  <span class="price">{{ precio(p.precio) }}</span>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="lead">Abre el detalle de un producto y actualiza para ver sugerencias similares.</p>
+          }
+        }
+      }
+    </section>
+  }
+
+  <dialog #dialogo class="detalle-producto" aria-labelledby="detalle-titulo">
+    <h2 id="detalle-titulo">{{ detalle()?.titulo }}</h2>
+    @if (detalle(); as producto) {
+      <p class="artist">{{ producto.artista }} · {{ producto.etiqueta }}</p>
+      @if (cargandoDetalle()) {
+        <p class="lead" role="status">Cargando detalles…</p>
+      } @else if (detalleError()) {
+        <p class="lead" role="status">No se pudo consultar la ficha actualizada.</p>
+      } @else if (producto.descripcion) {
+        <p class="lead">{{ producto.descripcion }}</p>
+      }
+      <p class="price">{{ precio(producto.precio) }} · {{ producto.stock > 0 ? 'Disponible' : 'Sin stock' }}</p>
+    }
+    <div class="row">
+      <button type="button" class="btn-ghost" autofocus (click)="dialogo.close()">Cerrar</button>
+      @if (detalle(); as producto) {
+        <button type="button" class="btn-primary" [disabled]="cargandoDetalle() || detalleError() || producto.stock < 1"
+          (click)="agregar(producto); dialogo.close()">Agregar al carrito</button>
+      }
+    </div>
+  </dialog>
 </main>

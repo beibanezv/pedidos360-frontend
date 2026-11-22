@@ -78,6 +78,21 @@ describe('azureInterceptor', () => {
     req.flush({});
   });
 
+  it('propaga el error del backend sin repetir un POST', () => {
+    configurar(mockMsal([{ username: 'a' }]));
+    let status: number | undefined;
+
+    http.post('http://localhost:8082/carrito/checkout', {}).subscribe({
+      error: (err) => { status = err.status; },
+    });
+    testing.expectOne('http://localhost:8082/carrito/checkout').flush({}, {
+      status: 503, statusText: 'Service Unavailable',
+    });
+
+    testing.expectNone('http://localhost:8082/carrito/checkout');
+    expect(status).toBe(503);
+  });
+
   it('no pisa un Authorization ya puesto', () => {
     configurar(mockMsal([{ username: 'a' }]));
 

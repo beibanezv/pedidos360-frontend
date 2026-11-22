@@ -34,6 +34,12 @@ export class ProductoService {
     );
   }
 
+  getDetalle(id: string): Observable<Producto> {
+    return this.http.get<ProductoBackend>(`${this.base}/productos/${encodeURIComponent(id)}`).pipe(
+      map((raw) => new Producto(raw)),
+    );
+  }
+
   /** Crea un producto (ms-productos exige JWT; el id lo genera el backend). */
   crear(datos: Omit<ProductoBackend, 'id'>): Observable<ProductoBackend> {
     return this.http.post<ProductoBackend>(`${this.base}/productos`, datos);

@@ -13,9 +13,8 @@ export class OrdenService {
     return environment.useGateway ? environment.apiUrl : environment.ordenesUrl;
   }
 
-  /** Órdenes del usuario logueado (se filtra por su oid/sub de Azure). */
-  misOrdenes(usuarioId: string): Observable<OrdenDTO[]> {
-    const id = encodeURIComponent(usuarioId);
-    return this.http.get<OrdenDTO[]>(`${this.base}/ordenes?usuarioId=${id}`);
+  /** El servidor obtiene al dueño desde el JWT. */
+  misOrdenes(): Observable<OrdenDTO[]> {
+    return this.http.get<OrdenDTO[]>(`${this.base}/ordenes`);
   }
 }
