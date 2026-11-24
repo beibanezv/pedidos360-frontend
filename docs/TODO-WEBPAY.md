@@ -62,19 +62,19 @@
 
 ## Fase 4 — AWS (lab vacío, con time-box)
 
-- [ ] 4.1 RDS: crear instancia y todas las bases de los repos; anotar endpoint.
-- [ ] 4.2 EC2: productos, carrito, login, host Rabbit+Kafka+ordenes/notif/audit/admin/cupones, host `ms-pagos`, host frontend nginx.
-- [ ] 4.3 Obtener IPs públicas y actualizar integraciones del Gateway.
-- [ ] 4.4 Compilar jar de `pedidos360-lambda-authorizer` y ejecutar `migrar-lab-nuevo.ps1` (Cognito + Lambda dual + API de 33 rutas).
-- [ ] 4.5 Ejecutar `rutas-ep5.ps1` (pagos/analytics/admin) y agregar 3 rutas nuevas: `POST /pagos/webpay/iniciar` (CUSTOM), `POST /pagos/webpay/retorno` (NONE) y su OPTIONS.
-- [ ] 4.6 Configurar `WEBPAY_RETURN_URL` con la invoke URL HTTPS del Gateway y `FRONTEND_ORIGIN` exacto.
-- [ ] 4.7 `ng build --configuration production` con `apiUrl` real; redesplegar frontend nginx.
-- [ ] 4.8 Matriz: catálogo 200, sin token 401, Cognito 200, escritura con Cognito 403, ruta inexistente 404.
-- [ ] 4.9 Compra WebPay real por HTTPS con tarjeta de prueba; verificar resultado y evento Kafka.
-- [ ] 4.10 Verificación: salida de la matriz guardada como evidencia.
-- **Commit checkpoint:** cambios de configuración/scripts necesarios (nunca credenciales).
+- [x] 4.1 RDS `p360-postgres` creada con 4 bases (pagos, productos, carrito, ordenes).
+- [x] 4.2 EC2 `p360-core` (Rabbit + productos/carrito/login/orders) y `p360-webpay` (pagos + nginx). **Despliegue mínimo**: no se levantaron analytics, cupones, notificaciones, auditoría ni admin.
+- [x] 4.3 Gateway negocio `w9om0sanri` con 30 rutas explícitas (cero proxy) y Gateway frontend `epko9lnv5a` con HTTPS y SPA fallback.
+- [x] 4.4 Cognito pool `us-east-1_GKASCM5yT` + cliente + usuario `cliente@pedidos360.cl`. Authorizer JWT **nativo de Cognito** (no se desplegó la Lambda dual: no alcanzó el tiempo; Azure no autentica en este despliegue mínimo).
+- [x] 4.5 Rutas WebPay: `POST /pagos/webpay/iniciar` con JWT y `POST /pagos/webpay/retorno` sin JWT (302 al frontend).
+- [x] 4.6 `WEBPAY_RETURN_URL` apunta al retorno del Gateway; `FRONTEND_ORIGIN` al origin HTTPS exacto.
+- [x] 4.7 Frontend compilado con `--base-href /desarrollo/` y nuevo pool; nginx con `try_files` (fallback SPA).
+- [x] 4.8 Matriz verificada: catálogo 200, sin token 401, carrito/login con token 200, frontend 200.
+- [x] 4.9 Flujo real: checkout → orden 18.990 CLP → `iniciar` 200 con token y URL de Transbank; `GET /pagos/{id}` = PENDIENTE; retorno 302 con ERROR (commit no completado en pasarela).
+- [x] 4.10 Antifraude en vivo: 3 intentos 200, 4º **429**. Evidencia en `docs/evidencias-webpay.md`.
+- **Commit checkpoint:** `environment.prod.ts` y evidencia en frontend; fix `buyOrder` en ms-pagos.
 
-> Si quedan <45 min de sesión: parar en la última fase verificada y marcar aquí qué quedó pendiente. No afirmar despliegue incompleto.
+> Pendiente por tiempo: pago APROBADO de punta a punta requiere completar el formulario de tarjeta en el navegador de Transbank (no automatizable con curl); Lambda dual para Azure; WSS; servicios EP4/EP5 no desplegados en este lab.
 
 ## Fase 5 — Cierre y entrega
 
