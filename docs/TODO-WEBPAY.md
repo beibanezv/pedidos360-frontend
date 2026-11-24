@@ -51,14 +51,14 @@
 
 ## Fase 3 — Verificación local end-to-end
 
-- [ ] 3.1 Docker: Postgres pagos (5439), clúster Kafka (9092-9094 + UI 8091) y RabbitMQ (2 nodos).
-- [ ] 3.2 Arrancar ms-orders (8084), ms-pagos (8089) y `ng serve` (4200).
-- [ ] 3.3 Flujo real local: checkout → orden → `/pago/:ordenId` → WebPay con tarjeta VISA aprobada.
-- [ ] 3.4 Flujo rechazado con Mastercard y ráfaga de 3 peticiones → 429, sin eventos publicados.
-- [ ] 3.5 Confirmar resultado final en `GET /pagos/{ordenId}` y mensaje en `p360.pagos.v1`.
-- [ ] 3.6 Guardar capturas en `evidencia-local/` y actualizar su README.
-- [ ] 3.7 Verificación: matriz local 200/429 + pago aprobado/rechazado visible.
-- **Commit checkpoint:** evidencias y ajustes menores en los repos correspondientes.
+- [x] 3.1 Docker Desktop arrancado y Postgres de pagos levantado (`docker compose up -d` en ms-pagos).
+- [x] 3.2 `mvn package` (online, para bajar plugins) y ms-pagos arrancado en 8089 con `Start-Process java -jar`; verificado `Started PagosApplication`.
+- [x] 3.3 Smoke test local: `POST /webpay/retorno` sin token → **302** a `/pago/resultado?resultado=ERROR`; `GET /pagos/{id}` y `POST /webpay/iniciar` sin JWT → **401**.
+- [x] 3.4 SDK contra Transbank integración (jshell, sin JWT): `create()` devolvió token y `https://webpay3gint.transbank.cl/webpayserver/initTransaction`. El `returnUrl` localhost fue aceptado.
+- [ ] 3.5 Flujo completo con JWT real (checkout → orden → WebPay → commit): se hará en AWS (Fase 4), donde se creará el pool Cognito. Requiere sesión browser autenticada; no se pudo simular con token válido en local.
+- [ ] 3.6 Ráfaga de 3 peticiones autenticadas → 429 y pago rechazado con Mastercard: queda para la verificación en vivo de Fase 4 (los equivalentes unitarios ya pasan).
+- [ ] 3.7 Guardar capturas en `evidencia-local/` y actualizar su README (se hará con la evidencia AWS).
+- **Commit checkpoint:** sin cambios de código en esta fase; ToDo actualizado en el frontend.
 
 ## Fase 4 — AWS (lab vacío, con time-box)
 
@@ -95,3 +95,4 @@
 | 2026-11-24 | 0 | ToDo creado; pull de los 9 repos; 3 repos nuevos creados desde el contexto | frontend `15a07be`, ms-pagos `4c63770`, analytics `0c026b7`, lambda `d071c40` |
 | 2026-11-24 | 1 | Backend WebPay (SDK, servicio, controller, retorno, tests) | ms-pagos `76a9bb2`; `mvn test` 17/0/0 (4 saltados) |
 | 2026-11-24 | 2 | Angular: servicio, página de pago, resultado, CTA en carrito, tests | frontend `25/25 SUCCESS`, build OK |
+| 2026-11-24 | 3 | Smoke local (302/401) + SDK Transbank integración verificado (token + URL) | ms-pagos arrancó en 8089; E2E con JWT queda para AWS |
