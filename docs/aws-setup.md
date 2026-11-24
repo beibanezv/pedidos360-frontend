@@ -29,8 +29,8 @@ Máquinas (lab `us-east-1`, cuenta del curso):
 
 - Cuenta AWS Academy Learner Lab. **OJO: el Lab resetea recursos entre
   sesiones** — IPs, EC2 y RDS pueden no existir al volver; reconstrúyelo cerca
-  de la entrega (ver `runbook-fase3-aws.md` secc. 8 y `migrar-lab-nuevo.ps1`
-  en la raíz del workspace). Tras cada reapertura hay que actualizar las URIs
+  de la entrega (ver `Documentacion/runbook-fase3-aws.md` secc. 8 y `Documentacion/migrar-lab-nuevo.ps1`).
+  Tras cada reapertura hay que actualizar las URIs
   de las integraciones a las IPs nuevas (`update-integration` aplica altiro,
   sin redesplegar).
 - Clave SSH vía `aws ec2-instance-connect send-ssh-public-key` (expira en

@@ -2,7 +2,7 @@
 
 **Última actualización: 2026-10-10 (madrugada)** — Cognito verificado vivo de punta a punta: pool propio en el lab, Lambda `p360-authorizer` con valores reales conectada al API de negocio (`p360-dual`), 33 rutas explícitas (cero `{proxy+}`), segundo issuer en los 3 backends con Spring Security y matriz dual 401/403/200 comprobada con tokens reales. Auditado contra `Enunciado 2`, pauta **EP3** y pauta **EP4**.
 
-> Este archivo es el pendiente vivo del frontend de Pedidos360 para la evaluación 2 (EP3 encargo 12% + EP4 presentación 18%). La verdad del estado por fase vive en `ESTADO-EP3-EP4.md` (raíz del workspace) y en `AGENTS.md`; si algo de aquí contradice a esos dos, ganan ellos y este archivo está desactualizado.
+> Este archivo es el pendiente vivo del frontend de Pedidos360 para la evaluación 2 (EP3 encargo 12% + EP4 presentación 18%). La verdad del estado por fase vive en `Material visto en clase/Unidad 2/Evaluacion 2/ESTADO-EP3-EP4.md` y en `AGENTS.md`; si algo de aquí contradice a esos dos, ganan ellos y este archivo está desactualizado.
 
 **Estado general:** la evaluación 1 (EP1/EP2) está cerrada y verificada en AWS. EP3/EP4 está implementado, probado y **desplegado**: la infra del lab sobrevivió (API `13uwepgzy9`, 5 EC2, RDS) y la doble vía de login funciona viva. Lo que queda es **jubilar el authorizer nativo**, las **2 evidencias baratas** (tenant Entra ID + Postman), el **guion de defensa** y la **entrega en AVA**.
 
@@ -21,7 +21,7 @@
 | 7 | Lógica de crear colas/exchanges encapsulada en un servicio (10%) | **CUMPLIDO** | `service/RabbitAdminService.java`: `crearCola`, `crearExchange`, `crearBinding`, `infoCola`, `eliminarCola`, `eliminarExchange`, `purgarCola`. El controlador solo llama esos métodos y no toca `RabbitAdmin`. |
 | 8 | Validación de parámetros de entrada con DTO (7%) | **CUMPLIDO** | `CrearColaRequest`/`CrearExchangeRequest`/`CrearBindingRequest` con `@NotBlank` (+ `@Pattern` para el tipo de exchange), `@Valid` en el controlador y `GlobalExceptionHandler` que devuelve 400 con mensajes claros, 404 si no existe y 503 si el broker está caído. |
 
-**Pruebas backend (carrito 15, productos 15, login 6, orders 12, notificaciones 11, cupones 18, admin 8, auditoría 6; corridas con `mvn -o test` en esta máquina).** `docs/evidencias.md` y versiones viejas de `ESTADO-EP3-EP4.md` decían "auditoría 5": son 6 en el código actual.
+**Pruebas backend (carrito 15, productos 15, login 6, orders 12, notificaciones 11, cupones 18, admin 8, auditoría 6; corridas con `mvn -o test` en esta máquina).** `docs/evidencias.md` y versiones viejas de `Material visto en clase/Unidad 2/Evaluacion 2/ESTADO-EP3-EP4.md` decían "auditoría 5": son 6 en el código actual.
 
 ---
 
@@ -50,13 +50,13 @@
 1. **Archivar las 3 capturas en `docs/evidencias/`** (tenant, Postman 202, correo DuocUC) + commit.
 2. **Guion de defensa EP4 + ensayo** (5-10 min, orden de los 11 puntos, individual). *Bloqueador:* ninguno.
 3. **Entrega: subir a AVA + email al profe** con los enlaces de los 10 repos (tags al HEAD, ver Notas). *Bloqueador:* ninguno.
-4. **Probar `migrar-lab-nuevo.ps1`** contra el lab nuevo cuando toque. *Bloqueador:* ninguno.
+4. **Probar `Documentacion/migrar-lab-nuevo.ps1`** contra el lab nuevo cuando toque. *Bloqueador:* ninguno.
 
 ---
 
 ## Cognito — verificado vivo 2026-10-10 (era el "orden obligatorio")
 
-Detalle completo en `brief-cognito-lambda-authorizer.md` (raíz del workspace). Estado:
+Detalle completo en `Documentacion/brief-cognito-lambda-authorizer.md`. Estado:
 
 1. **Lambda authorizer: el Java del material de clase, con valores reales.** Repo propio **`pedidos360-lambda-authorizer`** (`beibanezv`, tag `v1.0.1`, 39/39 tests, sin el `function.jar` de 26 MB): Azure JWKS/issuer en **v1.0** (el repo base traia v2.0) + pool propio de Cognito. Desplegada como **`p360-authorizer`** (java21) y conectada al API de negocio como authorizer REQUEST **`p360-dual`** (payload 2.0, TTL 300). El codigo Node no se reutilizo (politica IAM de REST API + issuer v2.0) y su copia del companero se perdio con su `%TEMP%`; la API demo `0kshk6n4yh` ya no existe. El nativo `azure-ad` se jubilo (queda solo `p360-dual`).
 2. **Gate: VERIFICADO con ambos proveedores.** Invoke directo a la Lambda: Cognito `true`, Azure v1.0 `true`, sin token `false`. Matriz viva por el gateway: sin token 401, malo 403, `GET /productos` 200, Azure 200, Cognito 200, `POST /productos` con Cognito 403 (sin Admin, correcto), `OPTIONS` 200.
@@ -72,7 +72,7 @@ El código de `docs/lambda-authorizer/index.mjs` **no se reutilizó**: responde 
 
 ## Comandos de verificación
 
-> Lab propio del usuario con credenciales vigentes (cuenta 945401641647, `us-east-1`). Si un comando `aws` falla con `InvalidClientTokenId`, la sesión expiró: abrir una nueva y reescribir `~/.aws/credentials`. Procedimiento de reapertura en `runbook-fase3-aws.md` sección 8.
+> Lab propio del usuario con credenciales vigentes (cuenta 945401641647, `us-east-1`). Si un comando `aws` falla con `InvalidClientTokenId`, la sesión expiró: abrir una nueva y reescribir `~/.aws/credentials`. Procedimiento de reapertura en `Documentacion/runbook-fase3-aws.md` sección 8.
 
 **Clúster y topología (local, desde `pedidos360/pedidos360-ms-admin/docker/rabbitmq-cluster`):**
 
