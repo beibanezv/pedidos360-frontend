@@ -8,6 +8,8 @@ import { Carrito } from './carrito/carrito';
 import { Ordenes } from './ordenes/ordenes';
 import { Admin } from './admin/admin';
 import { CognitoCallback } from './cognito/callback';
+import { Pago } from './pago/pago';
+import { Resultado } from './pago/resultado';
 import { adminGuard } from './core/security/admin.guard';
 import { sesionGuard } from './core/security/sesion.guard';
 
@@ -19,5 +21,8 @@ export const routes: Routes = [
   { path: 'cuenta', component: Cuenta, canActivate: [sesionGuard] },
   { path: 'carrito', component: Carrito, canActivate: [sesionGuard] },
   { path: 'ordenes', component: Ordenes, canActivate: [sesionGuard] },
+  // 'resultado' debe ir antes que ':ordenId' para no absorberse como parámetro.
+  { path: 'pago/resultado', component: Resultado, canActivate: [sesionGuard] },
+  { path: 'pago/:ordenId', component: Pago, canActivate: [sesionGuard] },
   { path: 'admin', component: Admin, canActivate: [sesionGuard, adminGuard] },
 ];

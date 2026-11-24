@@ -1,0 +1,23 @@
+<main class="wrap">
+  <section class="resultado">
+    @if (cargando()) {
+      <h1>Verificando tu pago…</h1>
+      <p class="lead">Consultando el resultado con Transbank.</p>
+    } @else if (error()) {
+      <h1>No se pudo verificar</h1>
+      <p class="error">{{ error() }}</p>
+      <a routerLink="/ordenes" class="btn-ghost">Ver mis órdenes</a>
+    } @else if (pago(); as p) {
+      @if (p.resultado === 'APROBADO') {
+        <h1 class="aprobado">¡Pago aprobado!</h1>
+      } @else {
+        <h1 class="rechazado">Pago no aprobado</h1>
+      }
+      <p class="lead">
+        Orden N° {{ p.ordenId.slice(0, 8) }} · Monto {{ precio(p.totalClp) }}
+      </p>
+      <p class="estado">Resultado registrado: {{ p.resultado }}</p>
+      <a routerLink="/ordenes" class="btn-primary">Ver mis órdenes</a>
+    }
+  </section>
+</main>

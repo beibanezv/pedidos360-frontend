@@ -1,0 +1,22 @@
+<main class="wrap">
+  <section class="pago">
+    <h1>Pagar con WebPay</h1>
+    <p class="lead">
+      Orden N° {{ ordenId().slice(0, 8) }} · Total a pagar
+      <strong>{{ precio(total()) }}</strong>
+    </p>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    <div class="actions">
+      <button type="button" class="btn-primary" (click)="iniciar()" [disabled]="cargando() || !ordenId()">
+        {{ cargando() ? 'Conectando con WebPay…' : 'Pagar con WebPay' }}
+      </button>
+      <a routerLink="/carrito" class="btn-ghost">Volver al carrito</a>
+    </div>
+
+    <p class="nota">Serás redirigido a la pasarela segura de Transbank. Usa las tarjetas de prueba de integración.</p>
+  </section>
+</main>

@@ -40,13 +40,13 @@
 
 ## Fase 2 — Frontend Angular
 
-- [ ] 2.1 `src/app/services/pago.service.ts`: `iniciar(ordenId)` con base `useGateway ? apiUrl : pagosUrl`.
-- [ ] 2.2 `src/app/pago/` (componente + HTML + CSS): ruta `/pago/:ordenId` con `sesionGuard`, botón "Pagar con WebPay", auto-POST oculto a la URL de Transbank con `token_ws`.
-- [ ] 2.3 `src/app/pago/resultado.*`: ruta `/pago/resultado`, lee `ordenId` de query y consulta `GET /pagos/{ordenId}` con los interceptores existentes.
-- [ ] 2.4 `carrito.html/ts`: CTA "Pagar con WebPay" tras el checkout apuntando a `/pago/{ordenId}?total=…`.
-- [ ] 2.5 `app.routes.ts`: registrar las dos rutas nuevas. Estilos con los tokens del mockup (sin CSS inline azul del material).
-- [ ] 2.6 Tests Angular: servicio y componente de resultado.
-- [ ] 2.7 Verificación: `ng test` y `ng build` (production) sin errores.
+- [x] 2.1 `PagoService`: `iniciar(ordenId)` y `consultar(ordenId)` con base `useGateway ? apiUrl : pagosUrl`.
+- [x] 2.2 `src/app/pago/pago.*`: ruta `/pago/:ordenId` con `sesionGuard`; botón y auto-POST de formulario con `token_ws`; mensaje específico para 429.
+- [x] 2.3 `src/app/pago/resultado.*`: ruta `/pago/resultado`, consulta `GET /pagos/{ordenId}` con los interceptores existentes (estado auténtico, no el query param).
+- [x] 2.4 `carrito.html/ts`: tras el checkout se guardan `ordenId`/`totalClp` y aparece el CTA "Pagar con WebPay".
+- [x] 2.5 `app.routes.ts`: `/pago/resultado` antes que `/pago/:ordenId`; estilos con los tokens del mockup.
+- [x] 2.6 Tests Angular nuevos: `pago.service.spec.ts` (2) y `resultado.spec.ts` (1).
+- [x] 2.7 Verificación: `ng build --configuration production` exit 0; `ng test --watch=false --browsers=ChromeHeadless` → **25/25 SUCCESS** (antes 22). `npm ci` instaló dependencias. Se agregó `ng-*.log` al `.gitignore`.
 - **Commit checkpoint:** `feature/webpay` en `pedidos360-frontend` con mensaje "agrega pantallas de pago WebPay y resultado".
 
 ## Fase 3 — Verificación local end-to-end
@@ -94,3 +94,4 @@
 |---|---|---|---|
 | 2026-11-24 | 0 | ToDo creado; pull de los 9 repos; 3 repos nuevos creados desde el contexto | frontend `15a07be`, ms-pagos `4c63770`, analytics `0c026b7`, lambda `d071c40` |
 | 2026-11-24 | 1 | Backend WebPay (SDK, servicio, controller, retorno, tests) | ms-pagos `76a9bb2`; `mvn test` 17/0/0 (4 saltados) |
+| 2026-11-24 | 2 | Angular: servicio, página de pago, resultado, CTA en carrito, tests | frontend `25/25 SUCCESS`, build OK |

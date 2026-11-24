@@ -43,6 +43,7 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 ng-serve-*.log
+ng-*.log
 
 # Environment files with local endpoints or tokens
 .env

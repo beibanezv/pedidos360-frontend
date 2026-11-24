@@ -6,6 +6,11 @@
          mensaje de confirmación debe seguir visible. -->
     @if (mensaje()) {
       <p class="ok">{{ mensaje() }}</p>
+      @if (ordenId()) {
+        <a [routerLink]="['/pago', ordenId()]" [queryParams]="{ total: totalPago() }" class="btn-primary">
+          Pagar con WebPay
+        </a>
+      }
     }
 
     @if (cargando()) {

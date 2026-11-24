@@ -41,6 +41,9 @@ export class Carrito {
   // en ese caso se lo pedimos al comprador antes de finalizar.
   protected readonly pideEmail = signal(false);
   protected readonly emailCompra = signal('');
+  // Datos de la orden recién creada, para ofrecer el pago con WebPay.
+  protected readonly ordenId = signal('');
+  protected readonly totalPago = signal(0);
 
   protected readonly items = computed(() => this.carrito()?.items ?? []);
   protected readonly total = computed(() => totalCarrito(this.items()));
@@ -136,6 +139,8 @@ export class Carrito {
       next: (res) => {
         const orden = res.ordenId ? ` Orden N° ${res.ordenId.slice(0, 8)}.` : '';
         this.mensaje.set(`Compra completada: ${res.itemsComprados} ${res.itemsComprados === 1 ? 'ítem' : 'ítems'} por ${this.precio(res.totalClp)}.${orden}`);
+        this.ordenId.set(res.ordenId ?? '');
+        this.totalPago.set(res.totalClp);
         this.cargar();
       },
       error: () => this.error.set('No se pudo completar la compra.'),
