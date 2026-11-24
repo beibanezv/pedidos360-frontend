@@ -34,7 +34,9 @@ Transbank rechaza `buyOrder` de más de 26 caracteres (UUID = 36). El backend ah
 `"TX" + 22 caracteres del UUID sin guiones` (24 caracteres) y guarda ese mismo valor para
 validar el commit. Tras el fix, `iniciar` responde 200 con token y URL de WebPay.
 
-## Limitación conocida
+## Fallo de commit corregido
 
-Si Transbank devuelve error en el `commit`, el pago queda en `PENDIENTE` y el retorno redirige
-con `resultado=ERROR`. No se aprueba nada, pero la fila no pasa a `RECHAZADO` (mejora pendiente).
+Si Transbank devuelve error en el `commit`, `fallarWebpay()` marca el pago como `RECHAZADO`
+y el retorno redirige con `resultado=ERROR`. Verificado en vivo: orden
+`55203a89-24fa-4c0f-9f79-44dcd84ab5fa`, `GET /pagos/{ordenId}` → `resultado: RECHAZADO`.
+Ningún pago no confirmado llega a `APROBADO`.

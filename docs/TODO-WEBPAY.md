@@ -74,7 +74,7 @@
 - [x] 4.10 Antifraude en vivo: 3 intentos 200, 4º **429**. Evidencia en `docs/evidencias-webpay.md`.
 - **Commit checkpoint:** `environment.prod.ts` y evidencia en frontend; fix `buyOrder` en ms-pagos.
 
-> Pendiente por tiempo: pago APROBADO de punta a punta requiere completar el formulario de tarjeta en el navegador de Transbank (no automatizable con curl); Lambda dual para Azure; WSS; servicios EP4/EP5 no desplegados en este lab.
+> Mejora aplicada al cierre: si el `commit` de Transbank falla, `fallarWebpay()` pasa el pago a `RECHAZADO` (verificado en vivo con la orden `55203a89-…`). Queda pendiente por tiempo: pago APROBADO de punta a punta (requiere completar el formulario de tarjeta en el navegador de Transbank), Lambda dual para Azure, WSS y servicios EP4/EP5 no desplegados en este lab.
 
 ## Fase 5 — Cierre y entrega
 
@@ -96,4 +96,4 @@
 | 2026-11-24 | 1 | Backend WebPay (SDK, servicio, controller, retorno, tests) | ms-pagos `76a9bb2`; `mvn test` 17/0/0 (4 saltados) |
 | 2026-11-24 | 2 | Angular: servicio, página de pago, resultado, CTA en carrito, tests | frontend `25/25 SUCCESS`, build OK |
 | 2026-11-24 | 3 | Smoke local (302/401) + SDK Transbank integración verificado (token + URL) | ms-pagos arrancó en 8089; E2E con JWT queda para AWS |
-| 2026-11-24 | 4 | Despliegue mínimo AWS + flujo WebPay real + antifraude 429 | frontend `v1.6.0`, ms-pagos `v1.1.0`; evidencia en `docs/evidencias-webpay.md` |
+| 2026-11-24 | 4 | Despliegue mínimo AWS + flujo WebPay real + antifraude 429 + fallback de commit | frontend `v1.6.0`, ms-pagos `v1.1.1`; 18 tests verdes; evidencia en `docs/evidencias-webpay.md` |
