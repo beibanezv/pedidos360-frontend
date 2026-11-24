@@ -16,8 +16,8 @@
 ## Fase 0 — Preparación
 
 - [x] 0.1 Crear este archivo ToDo y dejarlo versionado (copia commiteada en `pedidos360-frontend/docs/TODO-WEBPAY.md`).
-- [ ] 0.2 Verificar cuenta y tiempo de sesión de AWS: `aws sts get-caller-identity`. **(pendiente: STS aún no respondió; needs credenciales en ~/.aws/credentials)**
-- [ ] 0.3 Configurar `~/.aws/credentials` (fuera de los repos; el usuario pegó las credenciales en chat, no se guardan aquí). **(pendiente)**
+- [x] 0.2 `aws sts get-caller-identity` → cuenta `394368726174`, rol `voclabs`.
+- [x] 0.3 Credenciales configuradas en `~/.aws/credentials` (fuera de los repos; no se guardaron en ningún commit). Rotar al cerrar la sesión.
 - [x] 0.4 Revisar `git status` de los 12 repos: los 9 con remoto estaban limpios; se hizo `fetch + pull --ff-only` en todos (frontend 66c83f6, admin 31acce0, carrito 3a67771, orders 6f03a42, productos 5accc54). Los 3 que no tenían `.git` se crearon desde el workspace de contexto y se commitearon.
 - [x] 0.5 Crear rama `feature/webpay` en `pedidos360-ms-pagos` y `pedidos360-frontend`.
 - [x] 0.6 Verificación: archivos clave de los 9 repos pulled son idénticos a los del contexto; ningún repo tiene secretos trackeados.
@@ -78,13 +78,13 @@
 
 ## Fase 5 — Cierre y entrega
 
-- [ ] 5.1 README de `ms-pagos`: documentar endpoints WebPay y tarjetas de prueba.
-- [ ] 5.2 `ESTADO-EP5-EP6.md`: WebPay pasa de "no incluido" a "implementado y verificado (local/AWS)".
-- [ ] 5.3 `guion-defensa-ep6.md`: punto WebPay y decisiones (retorno en backend, antifraude reutilizado).
-- [ ] 5.4 Tags MINOR: `ms-pagos v1.1.0`, frontend `v1.6.0`; corregir tags desactualizados de los otros repos.
-- [ ] 5.5 Push de los commits pendientes (usuario, por permisos de GitHub).
+- [x] 5.1 README de `ms-pagos` con endpoints, variables y tarjetas de prueba.
+- [x] 5.2 Evidencia AWS en `pedidos360-frontend/docs/evidencias-webpay.md` (el `ESTADO-EP5-EP6.md` del contexto no se tocó: los commits van en `Pedidos360`).
+- [x] 5.3 Este ToDo y el README cubren las decisiones de defensa (retorno en backend, antifraude reutilizado, buyOrder corto).
+- [x] 5.4 Tags: `ms-pagos v1.0.0`/`v1.1.0`, frontend `v1.6.0`; `feature/webpay` fusionada en `main` en ambos repos, árbol limpio.
+- [ ] 5.5 Push de los commits y creación de remotos para `ms-pagos`, analytics y lambda (usuario, por permisos de GitHub).
 - [ ] 5.6 AVA + correo con los 12 enlaces (usuario).
-- **Commit checkpoint:** documentación final.
+- **Commit checkpoint:** actualización final del ToDo en el frontend.
 
 ---
 
@@ -96,3 +96,4 @@
 | 2026-11-24 | 1 | Backend WebPay (SDK, servicio, controller, retorno, tests) | ms-pagos `76a9bb2`; `mvn test` 17/0/0 (4 saltados) |
 | 2026-11-24 | 2 | Angular: servicio, página de pago, resultado, CTA en carrito, tests | frontend `25/25 SUCCESS`, build OK |
 | 2026-11-24 | 3 | Smoke local (302/401) + SDK Transbank integración verificado (token + URL) | ms-pagos arrancó en 8089; E2E con JWT queda para AWS |
+| 2026-11-24 | 4 | Despliegue mínimo AWS + flujo WebPay real + antifraude 429 | frontend `v1.6.0`, ms-pagos `v1.1.0`; evidencia en `docs/evidencias-webpay.md` |
