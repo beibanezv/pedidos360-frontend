@@ -1,6 +1,6 @@
 # ToDo — Integración WebPay Plus en Pedidos360 (extra +5 de EP5/EP6)
 
-**Inicio:** 2026-11-24 · **Estado:** EN CURSO · **Responsable:** agente + usuario
+**Inicio:** 2026-11-24 · **Estado:** FASE 1 EN CURSO · **Responsable:** agente + usuario
 
 ## Reglas de trabajo (obligatorias)
 
@@ -15,28 +15,28 @@
 
 ## Fase 0 — Preparación
 
-- [ ] 0.1 Crear este archivo ToDo y dejarlo versionado.
-- [ ] 0.2 Verificar cuenta y tiempo de sesión de AWS: `aws sts get-caller-identity`.
-- [ ] 0.3 Configurar `~/.aws/credentials` (fuera de los repos; el usuario pegó las credenciales en chat, no se guardan aquí).
-- [ ] 0.4 Revisar `git status` de los 12 repos; identificar cambios sin commitear (frontend tiene 2 archivos modificados según `ANALISIS-PENDIENTES-EP5-EP6.md`).
-- [ ] 0.5 Crear rama `feature/webpay` en `pedidos360-ms-pagos` y `pedidos360-frontend`.
-- [ ] 0.6 Verificación: STS responde la cuenta correcta; ningún repo tiene secretos trackeados.
-- **Commit checkpoint:** este ToDo (en `Documentacion`, repo raíz de contexto).
+- [x] 0.1 Crear este archivo ToDo y dejarlo versionado (copia commiteada en `pedidos360-frontend/docs/TODO-WEBPAY.md`).
+- [ ] 0.2 Verificar cuenta y tiempo de sesión de AWS: `aws sts get-caller-identity`. **(pendiente: STS aún no respondió; needs credenciales en ~/.aws/credentials)**
+- [ ] 0.3 Configurar `~/.aws/credentials` (fuera de los repos; el usuario pegó las credenciales en chat, no se guardan aquí). **(pendiente)**
+- [x] 0.4 Revisar `git status` de los 12 repos: los 9 con remoto estaban limpios; se hizo `fetch + pull --ff-only` en todos (frontend 66c83f6, admin 31acce0, carrito 3a67771, orders 6f03a42, productos 5accc54). Los 3 que no tenían `.git` se crearon desde el workspace de contexto y se commitearon.
+- [x] 0.5 Crear rama `feature/webpay` en `pedidos360-ms-pagos` y `pedidos360-frontend`.
+- [x] 0.6 Verificación: archivos clave de los 9 repos pulled son idénticos a los del contexto; ningún repo tiene secretos trackeados.
+- **Commit checkpoint:** `pedidos360-frontend` `15a07be` "agrega ToDo de implementacion de WebPay"; nuevos repos locales: ms-pagos `4c63770`, analytics `0c026b7`, lambda `d071c40`.
 
 ## Fase 1 — Backend `pedidos360-ms-pagos`
 
-- [ ] 1.1 `pom.xml`: agregar `com.github.transbankdevelopers:transbank-sdk-java:6.2.1`. Confirmar que Jackson ya está cubierto por Spring Boot; no agregar Lombok.
-- [ ] 1.2 `application.properties`: variables `WEBPAY_COMMERCE_CODE`, `WEBPAY_RETURN_URL`, `FRONTEND_ORIGIN` (sin valores secretos).
-- [ ] 1.3 Crear `WebpayClient` (interfaz `crear`/`confirmar`) y `TransbankWebpayClient` (implementación con `WebpayPlus.Transaction.buildForIntegration`). Seam para tests.
-- [ ] 1.4 `Pago.java`: campos `tokenWebpay`, `buyOrder` y nuevo valor `PENDIENTE` en `PagoService.Resultado`; getters necesarios.
-- [ ] 1.5 `PagoService`: extraer verificación de velocidad existente; agregar `WEBPAY` a `TarjetaDemo`; métodos `iniciarWebpay(...)` y `confirmarWebpay(...)` con validación de `buyOrder`/`sessionId`/`amount` contra el pago guardado.
-- [ ] 1.6 `PagoOutbox`: omitir pagos `PENDIENTE` (sin cambiar la firma del método del repositorio para no romper el test actual).
-- [ ] 1.7 `PagoController`: `POST /pagos/webpay/iniciar` (JWT, 429 si bloqueado, `{url,token}` si OK) y `POST /pagos/webpay/retorno` (form `token_ws`, sin JWT, 302 al frontend). `GET /pagos/{ordenId}` intacto.
-- [ ] 1.8 `IdentityConfig`: `permitAll` solo para `/pagos/webpay/retorno` y OPTIONS; CORS con origen exacto (`CORS_ALLOWED_ORIGINS`).
-- [ ] 1.9 Tests: inicio OK, 429 por ráfaga, retorno aprobado, retorno rechazado/token desconocido, outbox no publica pendientes.
-- [ ] 1.10 Verificación: `mvn test` (primera vez online para bajar el SDK) y luego `mvn -o test > mvn-test.log` + grep de resultados. Ningún test regresado.
-- [ ] 1.11 Verificación manual: arrancar ms-orders + ms-pagos, `curl POST /pagos/webpay/iniciar` con JWT de prueba y confirmar 200/429.
-- **Commit checkpoint:** `feature/webpay` en `pedidos360-ms-pagos` con mensaje "agrega pago con WebPay Plus al microservicio de pagos".
+- [x] 1.1 `pom.xml`: agregado `transbank-sdk-java:6.2.1` (API verificada con `javap`: `buildForIntegration`, `create`, `commit`).
+- [x] 1.2 `application.properties`: variables `WEBPAY_COMMERCE_CODE`, `WEBPAY_API_KEY` (vacía = `IntegrationApiKeys.WEBPAY`), `WEBPAY_RETURN_URL`, `FRONTEND_ORIGIN`.
+- [x] 1.3 `WebpayClient` + `TransbankWebpayClient` con records propios (`Crear`, `Confirmar`) para testear sin Transbank.
+- [x] 1.4 `Pago.java`: campos `tokenWebpay` (único), `buyOrder`, valor `PENDIENTE` y getters/setters.
+- [x] 1.5 `PagoService`: `verificar()` reutiliza el antifraude (4º intento/10 s → 429), `iniciarWebpay()` guarda PENDIENTE, `confirmarWebpay()` valida buyOrder/sessionId/amount antes de APROBADO/RECHAZADO.
+- [x] 1.6 `PagoOutbox`: omite PENDIENTE sin cambiar la firma del repositorio.
+- [x] 1.7 `PagoController`: `POST /webpay/iniciar` y `POST /webpay/retorno` (302 a `/pago/resultado`); `GET /pagos/{ordenId}` intacto.
+- [x] 1.8 `IdentityConfig`: `permitAll` para el retorno y OPTIONS; CORS con origen exacto y método OPTIONS.
+- [x] 1.9 Tests nuevos: 8 en controller (incluye inicio, 429 y ambos retornos), 4 de servicio, 1 de outbox. Workaround `src/test/resources/mockito-extensions/org.mockito.plugins.MockMaker` con `SubclassByteBuddyMockMaker` porque el JDK instalado es 25 y el inline maker de Mockito no puede instrumentar.
+- [x] 1.10 Verificación: `mvn test` → **17 tests, 0 fallos, 0 errores, 4 saltados** (los 4 requieren Postgres/Kafka por variable de entorno). `BUILD SUCCESS`.
+- [ ] 1.11 Verificación manual con Docker: **movida a Fase 3** (Docker Desktop estaba apagado al cerrar esta fase).
+- **Commit checkpoint:** `feature/webpay` en `pedidos360-ms-pagos` → `76a9bb2` "agrega pago con WebPay Plus al microservicio de pagos".
 
 ## Fase 2 — Frontend Angular
 
@@ -92,4 +92,5 @@
 
 | Fecha | Fase | Qué se completó | Commit / verificación |
 |---|---|---|---|
-| 2026-11-24 | 0 | ToDo creado | — |
+| 2026-11-24 | 0 | ToDo creado; pull de los 9 repos; 3 repos nuevos creados desde el contexto | frontend `15a07be`, ms-pagos `4c63770`, analytics `0c026b7`, lambda `d071c40` |
+| 2026-11-24 | 1 | Backend WebPay (SDK, servicio, controller, retorno, tests) | ms-pagos `76a9bb2`; `mvn test` 17/0/0 (4 saltados) |
