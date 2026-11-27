@@ -234,40 +234,40 @@ recibido en la bandeja DuocUC.
 ![Postman a notificaciones](evidencias/postman-notificaciones.png)
 ![Correo recibido](evidencias/correo-postman.png)
 
-## 9. EvaluaciÃ³n 3 (EP5 / EP6) â€” estado al 2026-11-27
+
+## 9. Evaluación 3 (EP5 / EP6) — estado al 2026-11-27
 
 Entorno vigente: cuenta C1 `533267443375`, `us-east-1`, frontend
 `https://vnvm0n7p9a.execute-api.us-east-1.amazonaws.com/desarrollo/`, API
 `https://c402mdrbjb.execute-api.us-east-1.amazonaws.com/desarrollo`. Los labs
-`945401641647` y `394368726174` son histÃ³ricos; no mezclar sus capturas.
+`945401641647` y `394368726174` son históricos; no mezclar sus capturas.
 
-| Indicador | Evidencia / dÃ³nde | Fecha / alcance |
+| Indicador | Evidencia / dónde | Fecha / alcance |
 |---|---|---|
-| EP5 config cliente | `docs/M12-checklist.md`, `environment.prod.ts` de la rama C1 (no editado por MatÃ­as) | 27-11, C1 |
-| EP5 tÃ³picos/productores/consumidores | `docs/evidencias/m09-local.md`, ramas M05/M06b | 27-11, local |
-| EP5 servicio administrador | `ms-admin` (rama de BenjamÃ­n `fix/benjamin-admin-seguro`) | C1, verificar con Ã©l |
-| EP5 DTO/serializaciÃ³n | `PagoResueltoEvent` de seis campos, contrato G0 | 27-11, contrato |
-| EP5 separaciÃ³n consumidores/lÃ³gica | `BaseConsumer.java` en 5 repos, M06b | 27-11, local |
-| EP5 errores/reintentos | `BaseConsumer`: ACK, permanenteâ†’DLQ, transitorio 3Ã—1 sâ†’DLQ | 27-11, local |
-| EP5 polÃ­ticas de tÃ³picos | `docs/evidencias/m09-local.md`: 3 particiones/RF3/ISR2, 7/30 dÃ­as | 27-11, local |
+| EP5 config cliente | `docs/M12-checklist.md`, `environment.prod.ts` de la rama C1 (no editado por Matías) | 27-11, C1 |
+| EP5 tópicos/productores/consumidores | `docs/evidencias/m09-local.md`, ramas M05/M06b | 27-11, local |
+| EP5 servicio administrador | `ms-admin` (rama de Benjamín `fix/benjamin-admin-seguro`) | C1, verificar con él |
+| EP5 DTO/serialización | `PagoResueltoEvent` de seis campos, contrato G0 | 27-11, contrato |
+| EP5 separación consumidores/lógica | `BaseConsumer.java` en 5 repos, M06b | 27-11, local |
+| EP5 errores/reintentos | `BaseConsumer`: ACK, permanente→DLQ, transitorio 3×1 s→DLQ | 27-11, local |
+| EP5 políticas de tópicos | `docs/evidencias/m09-local.md`: 3 particiones/RF3/ISR2, 7/30 días | 27-11, local |
 | EP5 grupos | `p360-recomendaciones-v1`, `p360-metricas-v1` | local; C1 pendiente |
-| EP5 administraciÃ³n/scripts | `comprobar.ps1` (`cbcfafa`), rama `fix/matias-M09-comprobador` | 27-11, local |
+| EP5 administración/scripts | `comprobar.ps1` (`cbcfafa`), rama `fix/matias-M09-comprobador` | 27-11, local |
 | EP6 arquitectura/disponibilidad | `ESTADO-EP5-EP6.md`, matriz HTTP de C1 | 27-11, C1 |
 | EP6 particiones/RF | `docs/evidencias/m09-local.md` | 27-11, local |
-| EP6 Kafka UI | `docs/evidencias/m09-local.md` + capturas que entregue BenjamÃ­n | local; C1 pendiente |
-| EP6 flujo de eventos | carritoâ†’checkoutâ†’ordenâ†’pagoâ†’Kafka | pago aprobado en C1; evento cloud por verificar |
+| EP6 Kafka UI | `docs/evidencias/m09-local.md` + capturas que entregue Benjamín | local; C1 pendiente |
+| EP6 flujo de eventos | carrito→checkout→orden→pago→Kafka | pago aprobado en C1; evento cloud por verificar |
 | EP6 campos | `eventoId`, `usuarioId`, `ocurrioEn`, `tipo/productoId`, `ordenId/resultado/totalClp` | contrato + tests |
-| EP6 reacciÃ³n del sistema | recomendaciones y panel WSS | WSS sin desplegar; documentado como pendiente |
-| EP6 administraciÃ³n | REST Admin en rama de BenjamÃ­n | C1, verificar con Ã©l |
+| EP6 reacción del sistema | recomendaciones y panel WSS | WSS sin desplegar; documentado como pendiente |
+| EP6 administración | REST Admin en rama de Benjamín | C1, verificar con él |
 | EP6 offsets/lag/consumo | Kafka UI, `comprobar.ps1` | local; C1 pendiente |
-| EP6 casos/configuraciÃ³n | `docs/M12-checklist.md` (15 escenarios) | preparado; ejecuciÃ³n cloud pendiente |
+| EP6 casos/configuración | `docs/M12-checklist.md` (15 escenarios) | preparado; ejecución cloud pendiente |
 
-Extras separados: **Webpay +5** aprobado en C1 (orden `1720e01fâ€¦`, $15.990);
-**DynamoDB +2** y **WSS +3** con cÃ³digo en `integration/matias-M07-M08` pero sin
-despliegue confirmado. El pago aprobado no demuestra timeout seguro ni reconciliaciÃ³n;
+Extras separados: **Webpay +5** aprobado en C1 (orden `1720e01f…`, $15.990);
+**DynamoDB +2** y **WSS +3** con código en `integration/matias-M07-M08` pero sin
+despliegue confirmado. El pago aprobado no demuestra timeout seguro ni reconciliación;
 el intento anterior con `{"message":"Not Found"}` queda por reconciliar en Transbank.
 
 Las tres capturas antiguas de EP4 (`entraid-tenant-usuarios.png`,
-`postman-notificaciones.png`, `correo-postman.png`) ya estÃ¡n archivadas y se
+`postman-notificaciones.png`, `correo-postman.png`) ya están archivadas y se
 validaron el 27-11; no es necesario pedirlas otra vez.
-
