@@ -2,8 +2,9 @@
 
 > **Preparado el 2026-11-27. NO EJECUTADO.** Este documento es el guion para la sesión de
 > verificación en navegador; ninguna casilla se marca como aprobada sin evidencia del entorno C1.
-> Estado previo: login Microsoft y Cognito verificados; compra pequeña y pago Webpay aprobado
-> pendientes; M07/M08/WSS/Dynamo no desplegados; M09 solo con evidencia local.
+> Estado previo: login Microsoft y Cognito verificados; compra pequeña y pago WebPay **APROBADO en
+> C1** (orden `1720e01f…`, $15.990, 2026-11-27); M07/M08/WSS/Dynamo no desplegados; M09 solo con
+> evidencia local. El intento previo con `{"message":"Not Found"}` queda por reconciliar.
 
 ## Condiciones para ejecutarlo
 
@@ -23,7 +24,7 @@
 | 5 | Email/cupón en checkout | Acepta correo del token o lo pide; cupón válido aplica descuento | pendiente navegador |
 | 6 | Doble clic y reintento tras timeout | Un solo `ordenId`, misma `Idempotency-Key`; botón deshabilitado durante el registro | cubierto por tests (M02); pendiente con backend real |
 | 7 | `/ordenes` y pertenencia | Usuario A no ve órdenes de B; estados coherentes con C4 | pendiente C1 |
-| 8 | Pago WebPay | `iniciar` devuelve token/URL; resultado leído desde `GET /pagos/{id}`, nunca desde `?resultado=` de la URL | token/PENDIENTE verificado en local; aprobado pendiente |
+| 8 | Pago WebPay | `iniciar` devuelve token/URL; resultado leído desde `GET /pagos/{id}`, nunca desde `?resultado=` de la URL | ✅ APROBADO en C1 (orden `1720e01f…`, $15.990); resta probar rechazo/abandono |
 | 9 | Ráfaga de pagos | Cuarto intento en menos de 10 s → 429 con mensaje claro | verificado en local; pendiente C1 |
 | 10 | `/cuenta` con Azure y con Cognito | Claims visibles; Cognito con `token_use="id"` | ✅ verificado 2026-11-27 |
 | 11 | Login/logout y expiración | Sin bucle de redirección; token vencido se limpia y pide reingreso | cubierto por tests (M01); pendiente navegador |
@@ -34,8 +35,8 @@
 
 ## Bloqueos conocidos
 
-- La compra pequeña en C1 todavía no se ejecutó: sin ella no se puede afirmar checkout/orden en el entorno elegido.
-- Webpay no tiene pago **APROBADO** en navegador; un token, `PENDIENTE` o un 302 ERROR no prueba el extra.
+- La compra pequeña en C1 se ejecutó con pago WebPay aprobado; el rechazo y el abandono siguen sin probarse en navegador.
+- El intento previo que terminó en `{"message":"Not Found"}` debe ser reconciliado por Benjamín en Transbank antes de dar por cerrado el cobro; su token no se documenta.
 - M07/M08 están como código listo en ramas; orders/analytics desplegados siguen con JAR histórico del 22-11.
 - No hay URL `wss://…/ws/metricas` ni tabla DynamoDB aprovisionada: los puntos 13 y parte del 15 no se pueden cerrar hoy.
 - La evidencia Kafka cloud (M09) requiere sesión de lab nueva; solo existe la local.
