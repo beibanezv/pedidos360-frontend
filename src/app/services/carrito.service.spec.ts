@@ -73,4 +73,13 @@ describe('CarritoService', () => {
     expect(req.request.method).toBe('POST');
     req.flush({ carritoId: 'c-1', usuarioId: 'u-1', itemsComprados: 1, totalClp: 100, estado: 'checkout_ok' });
   });
+
+  it('checkout envía Idempotency-Key cuando se reintenta la misma operación', () => {
+    const clave = 'clave-estable-123';
+    service.checkout('a@b.cl', clave).subscribe();
+
+    const req = http.expectOne('http://localhost:8082/carrito/checkout?email=a@b.cl');
+    expect(req.request.headers.get('Idempotency-Key')).toBe(clave);
+    req.flush({ carritoId: 'c-1', usuarioId: 'u-1', itemsComprados: 1, totalClp: 100, estado: 'checkout_ok' });
+  });
 });

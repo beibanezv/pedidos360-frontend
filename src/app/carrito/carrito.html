@@ -6,7 +6,14 @@
          mensaje de confirmación debe seguir visible. -->
     @if (mensaje()) {
       <p class="ok">{{ mensaje() }}</p>
-      @if (ordenId()) {
+      @if (registrando()) {
+        <p class="lead">Registrando tu orden…</p>
+      }
+      @if (errorRegistro()) {
+        <p class="lead">{{ errorRegistro() }}</p>
+        <button type="button" class="btn-ghost" (click)="reintentarRegistro()">Reintentar consulta</button>
+      }
+      @if (ordenId() && !registrando()) {
         <a [routerLink]="['/pago', ordenId()]" [queryParams]="{ total: totalPago() }" class="btn-primary">
           Pagar con WebPay
         </a>
@@ -55,7 +62,9 @@
 
       <div class="actions">
         <a routerLink="/" class="btn-ghost">Seguir comprando</a>
-        <button type="button" class="btn-primary" (click)="finalizarCompra()">Finalizar compra</button>
+        <button type="button" class="btn-primary" (click)="finalizarCompra()" [disabled]="registrando()">
+          {{ registrando() ? 'Registrando compra…' : 'Finalizar compra' }}
+        </button>
       </div>
 
       @if (pideEmail()) {

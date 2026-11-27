@@ -17,4 +17,9 @@ export class OrdenService {
   misOrdenes(): Observable<OrdenDTO[]> {
     return this.http.get<OrdenDTO[]>(`${this.base}/ordenes`);
   }
+
+  /** Consulta acotada para confirmar que la orden ya se puede pagar. */
+  consultar(ordenId: string): Observable<OrdenDTO> {
+    return this.http.get<OrdenDTO>(`${this.base}/ordenes/${encodeURIComponent(ordenId)}`);
+  }
 }

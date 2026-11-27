@@ -63,9 +63,10 @@ export class CarritoService {
     );
   }
 
-  checkout(email?: string): Observable<CheckoutDTO> {
+  checkout(email?: string, idempotencyKey?: string): Observable<CheckoutDTO> {
     const params = email ? { email } : undefined;
-    return this.http.post<CheckoutDTO>(`${this.base}/carrito/checkout`, null, { params }).pipe(
+    const headers = idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined;
+    return this.http.post<CheckoutDTO>(`${this.base}/carrito/checkout`, null, { params, headers }).pipe(
       tap(() => this.totalItems.set(0)),
     );
   }
