@@ -3,7 +3,9 @@
  * Es el archivo que Angular inyecta al buildar con --configuration production
  * (fileReplacements en angular.json).
  *
- * Reemplaza el TODO-GATEWAY y el redirectUri con los valores reales al desplegar (fase 3).
+ * C1 pendiente: cuando Benjamín entregue el manifiesto del entorno único, actualizar
+ * apiUrl, redirects, pool/cliente de Cognito y WSS una sola vez aquí. Hoy refleja el
+ * despliegue mínimo usado para verificar WebPay, no un entorno definitivo.
  * clientId/tenantId NO son secretos: este archivo SÍ se commitea.
  */
 export const environment = {

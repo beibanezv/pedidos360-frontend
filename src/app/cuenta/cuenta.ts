@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 
+import { environment } from '../../environments/environment';
 import { AuthService, UsuarioLogin } from '../core/security/auth.service';
 import { CognitoAuthService } from '../core/security/cognito-auth.service';
 import { MetricasPanel } from './metricas-panel';
@@ -16,7 +17,7 @@ import { MetricasPanel } from './metricas-panel';
           <p class="lead">Sin sesión activa.</p>
         } @else {
           <p class="lead">{{ nombreSesion() }}</p>
-          <p class="lead">Proveedor: {{ esCognito() ? 'Cognito' : 'Microsoft (Azure AD)' }}</p>
+          <p class="lead">Proveedor: {{ esCognito() ? 'Cognito' : 'Microsoft Entra ID' }}</p>
 
           @if (esAzure()) {
             @if (auth.roles().length > 0) {
@@ -78,7 +79,7 @@ import { MetricasPanel } from './metricas-panel';
               y Productos.Read / Carrito.ReadWrite desde Azure AD.
             } @else {
               Revisa <code>sub</code>, <code>email</code> e <code>iss</code>: es el JWT de Cognito
-              (<code>https://cognito-idp.us-east-1.amazonaws.com/us-east-1_A8lrPsDta</code>).
+              (<code>https://cognito-idp.us-east-1.amazonaws.com/{{ poolId }}</code>).
             }
           </p>
         }
@@ -89,6 +90,7 @@ import { MetricasPanel } from './metricas-panel';
 export class Cuenta implements OnInit {
   protected readonly auth = inject(AuthService);
   protected readonly cognito = inject(CognitoAuthService);
+  protected readonly poolId = environment.cognito.userPoolId;
   protected readonly claims = computed(() =>
     this.auth.logueado() ? Object.entries(this.auth.claims()) : Object.entries(this.cognito.claimsCognito()),
   );

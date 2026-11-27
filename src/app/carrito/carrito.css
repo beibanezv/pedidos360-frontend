@@ -156,6 +156,7 @@
 }
 
 .email-checkout input:focus {
-  outline: none;
   border-color: var(--copper);
+  outline: 2px solid var(--copper);
+  outline-offset: 2px;
 }

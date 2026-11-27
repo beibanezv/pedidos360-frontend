@@ -26,7 +26,7 @@
       <p class="lead">{{ error() }}</p>
     } @else if (items().length === 0) {
       <p class="lead">Tu carrito está vacío.</p>
-      <a routerLink="/" class="btn-primary">Ir al catálogo</a>
+      <a routerLink="/catalogo" class="btn-primary">Ir al catálogo</a>
     } @else {
       <div class="rows">
         @for (v of itemsVista(); track v.item.id) {
@@ -61,7 +61,7 @@
       </div>
 
       <div class="actions">
-        <a routerLink="/" class="btn-ghost">Seguir comprando</a>
+        <a routerLink="/catalogo" class="btn-ghost">Seguir comprando</a>
         <button type="button" class="btn-primary" (click)="finalizarCompra()" [disabled]="registrando()">
           {{ registrando() ? 'Registrando compra…' : 'Finalizar compra' }}
         </button>

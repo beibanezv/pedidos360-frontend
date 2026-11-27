@@ -9,7 +9,7 @@
     <a routerLink="/cuenta" class="btn-primary">Ir a mi cuenta</a>
     <button type="button" class="btn-ghost" (click)="salirCognito()">Salir de Cognito</button>
   } @else {
-    <p class="lead">Explora el catálogo con una sesión local de demostración, o conecta tu cuenta Microsoft para comprar.</p>
+    <p class="lead">Explora el catálogo con una sesión local de demostración, o compra con tu cuenta Microsoft Entra ID o Cognito.</p>
     <form class="login-form" (submit)="$event.preventDefault(); entrarLocal(usuario.value, clave.value)">
       <label class="campo">
         <span>Usuario</span>
@@ -31,6 +31,6 @@
     <button type="button" class="btn-ghost" (click)="entrarCognito()">
       Continuar con Cognito
     </button>
-    <p class="login-nota">La sesión demo solo abre la interfaz. Agregar al carrito exige la cuenta Microsoft (el backend valida el token de Azure).</p>
+    <p class="login-nota">La sesión demo solo abre la interfaz. Para comprar, usa Microsoft Entra ID o Cognito: el backend valida el token de cualquiera de las dos vías.</p>
   }
 </section>
