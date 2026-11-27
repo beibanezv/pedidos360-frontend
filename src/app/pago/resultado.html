@@ -2,22 +2,42 @@
   <section class="resultado">
     @if (cargando()) {
       <h1>Verificando tu pago…</h1>
-      <p class="lead">Consultando el resultado con Transbank.</p>
+      <p class="lead">Consultando el estado registrado por el servidor.</p>
     } @else if (error()) {
       <h1>No se pudo verificar</h1>
-      <p class="error">{{ error() }}</p>
-      <a routerLink="/ordenes" class="btn-ghost">Ver mis órdenes</a>
+      <p class="error" role="alert">{{ error() }}</p>
+      <div class="actions">
+        @if (puedeConsultar) {
+          <button type="button" class="btn-primary" (click)="consultar()">Reintentar consulta</button>
+        }
+        <a routerLink="/ordenes" class="btn-ghost">Ver mis órdenes</a>
+      </div>
     } @else if (pago(); as p) {
-      @if (p.resultado === 'APROBADO') {
-        <h1 class="aprobado">¡Pago aprobado!</h1>
-      } @else {
-        <h1 class="rechazado">Pago no aprobado</h1>
+      @switch (p.resultado) {
+        @case ('APROBADO') {
+          <h1 class="aprobado">¡Pago aprobado!</h1>
+        }
+        @case ('PENDIENTE') {
+          <h1 class="pendiente">Pago en verificación</h1>
+          <p class="lead">El pago quedó pendiente. Todavía no hay confirmación de aprobación.</p>
+        }
+        @default {
+          <h1 class="rechazado">Pago no aprobado</h1>
+          <p class="lead">El intento no fue aprobado. Verifica el estado antes de decidir qué hacer.</p>
+        }
       }
       <p class="lead">
         Orden N° {{ p.ordenId.slice(0, 8) }} · Monto {{ precio(p.totalClp) }}
       </p>
-      <p class="estado">Resultado registrado: {{ p.resultado }}</p>
-      <a routerLink="/ordenes" class="btn-primary">Ver mis órdenes</a>
+      <p class="estado">Resultado registrado por el servidor: {{ p.resultado }}</p>
+      @if (p.resultado === 'APROBADO') {
+        <a routerLink="/ordenes" class="btn-primary">Ver mis órdenes</a>
+      } @else {
+        <div class="actions">
+          <button type="button" class="btn-primary" (click)="consultar()">Reintentar consulta</button>
+          <a routerLink="/ordenes" class="btn-ghost">Ver mis órdenes</a>
+        </div>
+      }
     }
   </section>
 </main>

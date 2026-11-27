@@ -22,17 +22,28 @@ export class Pago {
   protected readonly precio = formatPrecio;
 
   iniciar(): void {
+    // Un doble clic no genera un segundo POST; el reintento siempre es manual.
+    if (this.cargando()) return;
     this.cargando.set(true);
     this.error.set('');
     this.pagos.iniciar(this.ordenId()).subscribe({
       next: ({ url, token }) => this.redirigir(url, token),
       error: (fallo: HttpErrorResponse) => {
         this.cargando.set(false);
-        this.error.set(fallo.status === 429
-          ? 'Demasiados intentos de pago. Espera unos segundos antes de volver a intentar.'
-          : 'No se pudo conectar con WebPay. Inténtalo nuevamente.');
+        this.error.set(this.mensajeError(fallo.status));
       },
     });
+  }
+
+  /** M10: 409 y 429 tienen mensajes propios; nunca se reintenta el POST automáticamente. */
+  private mensajeError(status: number): string {
+    if (status === 409) {
+      return 'La orden no se puede pagar en su estado actual. Revisa tus órdenes antes de volver a intentarlo.';
+    }
+    if (status === 429) {
+      return 'Demasiados intentos de pago en poco tiempo (control antifraude). Espera unos segundos antes de volver a intentarlo.';
+    }
+    return 'No se pudo conectar con WebPay. Inténtalo nuevamente.';
   }
 
   /** Transbank espera un POST de formulario con token_ws, no un fetch. */

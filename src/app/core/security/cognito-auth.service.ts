@@ -128,7 +128,7 @@ export class CognitoAuthService {
       code_challenge_method: 'S256',
       code_challenge: challenge,
     });
-    window.location.href = `${this.cfg.domain}/login?${params.toString()}`;
+    window.location.href = `${this.cfg.domain}/oauth2/authorize?${params.toString()}`;
   }
 
   async completarLogin(code: string, state?: string | null): Promise<void> {

@@ -7,7 +7,8 @@
     </p>
 
     @if (error()) {
-      <p class="error">{{ error() }}</p>
+      <p class="error" role="alert">{{ error() }}</p>
+      <p class="recuperacion"><a routerLink="/ordenes" class="btn-ghost">Ver mis órdenes</a></p>
     }
 
     <div class="actions">

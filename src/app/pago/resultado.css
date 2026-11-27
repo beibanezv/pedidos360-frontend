@@ -16,6 +16,17 @@
   color: var(--rust);
 }
 
+.resultado .pendiente {
+  color: var(--copper);
+}
+
+.resultado .actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
 .estado {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 13px;

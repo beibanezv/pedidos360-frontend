@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { PagoService } from './pago.service';
@@ -25,6 +25,27 @@ describe('PagoService', () => {
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({ ordenId: 'orden-1' });
     req.flush({ url: 'https://webpay.test/pagar', token: 'token-1' });
+    http.expectNone('http://localhost:8089/webpay/iniciar');
+  });
+
+  it('propaga el 409 de orden no pagable sin reintentar el POST', () => {
+    let estado = 0;
+    service.iniciar('orden-1').subscribe({ error: (fallo: HttpErrorResponse) => (estado = fallo.status) });
+
+    const req = http.expectOne('http://localhost:8089/pagos/webpay/iniciar');
+    req.flush({ mensaje: 'orden no pagable' }, { status: 409, statusText: 'Conflict' });
+
+    expect(estado).toBe(409);
+  });
+
+  it('propaga el 429 de antifraude sin reintentar el POST', () => {
+    let estado = 0;
+    service.iniciar('orden-1').subscribe({ error: (fallo: HttpErrorResponse) => (estado = fallo.status) });
+
+    const req = http.expectOne('http://localhost:8089/pagos/webpay/iniciar');
+    req.flush({ mensaje: 'antifraude' }, { status: 429, statusText: 'Too Many Requests' });
+
+    expect(estado).toBe(429);
   });
 
   it('consulta el resultado con la ruta del pago', () => {

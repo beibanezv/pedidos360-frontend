@@ -4,6 +4,10 @@ import { timeout } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ExperienciaService } from '../services/experiencia.service';
 
+const MAX_REINTENTOS = 3;
+// El broadcast de EventBridge corre una vez por minuto; 8 s cerraba el panel entre envíos.
+const ESPERA_DATOS_MS = 90_000;
+
 const MEDIDAS = [
   { clave: 'vistasProducto', etiqueta: 'Fichas consultadas' },
   { clave: 'productosAgregados', etiqueta: 'Productos agregados' },
@@ -58,6 +62,7 @@ export class MetricasPanel {
   private socket?: WebSocket;
   private espera?: ReturnType<typeof setTimeout>;
   private intento = 0;
+  private reintentos = 0;
   protected readonly medidas = MEDIDAS;
   protected readonly habilitado = !!environment.metricasWsUrl;
   protected readonly metricas = signal<Metricas | null>(null);
@@ -71,6 +76,10 @@ export class MetricasPanel {
 
   conectar(): void {
     if (!this.habilitado || this.conectado() || this.conectando()) return;
+    if (this.reintentos >= MAX_REINTENTOS) {
+      this.estado.set('Se agotaron los reintentos. Vuelve a cargar la página para intentar de nuevo.');
+      return;
+    }
     const intento = ++this.intento;
     this.conectando.set(true);
     this.estado.set('Abriendo conexión segura…');
@@ -78,11 +87,11 @@ export class MetricasPanel {
       next: ({ ticket }) => {
         if (intento !== this.intento) return;
         try {
-          const socket = new WebSocket(environment.metricasWsUrl);
+          const socket = new WebSocket(environment.metricasWsUrl + '?ticket=' + encodeURIComponent(ticket));
           this.socket = socket;
           this.esperarDatos();
           socket.onopen = () => {
-            if (this.socket === socket) socket.send(ticket);
+            if (this.socket === socket) socket.send(JSON.stringify({ action: 'suscribir' }));
           };
           socket.onmessage = event => {
             if (this.socket !== socket) return;
@@ -92,37 +101,46 @@ export class MetricasPanel {
                 throw new Error();
               }
               this.metricas.set(datos);
+              this.reintentos = 0;
               this.conectando.set(false);
               this.conectado.set(true);
               this.estado.set('Recibiendo datos en vivo.');
               this.esperarDatos();
             } catch {
-              this.cerrar('No se pudieron leer las métricas. Vuelve a conectar.');
+              this.fallo('No se pudieron leer las métricas. Vuelve a conectar.');
             }
           };
           socket.onclose = () => {
-            if (this.socket === socket) this.cerrar('La conexión se cerró. Vuelve a conectar.');
+            if (this.socket === socket) this.fallo('La conexión se cerró. Vuelve a conectar.');
           };
           socket.onerror = () => {
-            if (this.socket === socket) this.cerrar('No se pudo conectar con las métricas. Intenta de nuevo.');
+            if (this.socket === socket) this.fallo('No se pudo conectar con las métricas. Intenta de nuevo.');
           };
         } catch {
-          this.cerrar('No se pudo abrir el panel. Intenta de nuevo.');
+          this.fallo('No se pudo abrir el panel. Intenta de nuevo.');
         }
       },
       error: () => {
-        if (intento === this.intento) this.cerrar('No se pudo autorizar el panel. Revisa tu sesión e intenta de nuevo.');
+        if (intento === this.intento) this.fallo('No se pudo autorizar el panel. Revisa tu sesión e intenta de nuevo.');
       },
     });
   }
 
   desconectar(): void {
+    this.reintentos = 0;
     this.cerrar('Panel desconectado.');
+  }
+
+  private fallo(mensaje: string): void {
+    this.reintentos++;
+    this.cerrar(this.reintentos >= MAX_REINTENTOS
+      ? 'Se agotaron los reintentos. Vuelve a cargar la página para intentar de nuevo.'
+      : mensaje);
   }
 
   private esperarDatos(): void {
     clearTimeout(this.espera);
-    this.espera = setTimeout(() => this.cerrar('No llegaron datos. Vuelve a conectar.'), 8000);
+    this.espera = setTimeout(() => this.fallo('No llegaron datos. Vuelve a conectar.'), ESPERA_DATOS_MS);
   }
 
   private cerrar(mensaje: string): void {

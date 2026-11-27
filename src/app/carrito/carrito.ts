@@ -157,7 +157,7 @@ export class Carrito {
       next: (res) => {
         this.claveCheckout.set(null);
         const orden = res.ordenId ? ` Orden N° ${res.ordenId.slice(0, 8)}.` : '';
-        this.mensaje.set(`Compra completada: ${res.itemsComprados} ${res.itemsComprados === 1 ? 'ítem' : 'ítems'} por ${this.precio(res.totalClp)}.${orden}`);
+        this.mensaje.set(`${orden ? orden.trim().slice(0, -1) : 'Orden'} registrada por ${this.precio(res.totalClp)}. Pendiente de pago con WebPay`);
         this.ordenId.set(res.ordenId ?? '');
         this.totalPago.set(res.totalClp);
         this.cargar();
