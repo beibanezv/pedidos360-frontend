@@ -1,6 +1,12 @@
-# Evidencia — WebPay Plus en Pedidos360 (2026-11-24)
+# Evidencia — WebPay Plus en Pedidos360
 
-Entorno: Learner Lab cuenta `394368726174`, región `us-east-1`, sesión del 2026-11-24.
+> **Estado 2026-11-27:** el despliegue vigente es C1 (cuenta `533267443375`). El bloque de abajo
+> corresponde al **lab mínimo del 24-11** y es histórico: sirve para explicar el flujo, no para
+> afirmar que ese entorno sigue activo. En C1 está desplegado el backend `ms-pagos` `b4d8342`
+> (rutas `ii36nav`/`29k1ghr`, JAR `dc72b050…`), pero **no hay pago aprobado en navegador**
+> verificado. No mezclar capturas de los dos labs.
+
+## Evidencia histórica (lab mínimo `394368726174`, 2026-11-24), región `us-east-1`.
 Sin credenciales ni tokens en este archivo.
 
 ## Recursos desplegados
