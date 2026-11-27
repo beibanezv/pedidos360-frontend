@@ -1,10 +1,23 @@
-# Pendientes Pedidos360 — EP3 / EP4 (RabbitMQ)
+# Pendientes Pedidos360 — estado vigente EP5/EP6 (2026-11-27)
 
-**Última actualización: 2026-10-10 (madrugada)** — Cognito verificado vivo de punta a punta: pool propio en el lab, Lambda `p360-authorizer` con valores reales conectada al API de negocio (`p360-dual`), 33 rutas explícitas (cero `{proxy+}`), segundo issuer en los 3 backends con Spring Security y matriz dual 401/403/200 comprobada con tokens reales. Auditado contra `Enunciado 2`, pauta **EP3** y pauta **EP4**.
+> El contenido EP3/EP4 que sigue es **histórico** (evaluación 2). La verdad vigente está en
+> `Material visto en clase/Unidad 3/Evaluacion 3/ESTADO-EP5-EP6.md`, en el
+> [plan de reparto](../../../desarrollo-cloud-contexto/docs/superpowers/plans/2026-11-26-reparto-benjamin-matias-ep5-ep6.md)
+> y en `docs/REPARTO-M01-M04.md`, `docs/REPARTO-M05-M08.md` y `docs/REPARTO-M06a.md`.
 
-> Este archivo es el pendiente vivo del frontend de Pedidos360 para la evaluación 2 (EP3 encargo 12% + EP4 presentación 18%). La verdad del estado por fase vive en `Material visto en clase/Unidad 2/Evaluacion 2/ESTADO-EP3-EP4.md` y en `AGENTS.md`; si algo de aquí contradice a esos dos, ganan ellos y este archivo está desactualizado.
+**Verificado en C1:** catálogo 200 (8 productos), 401 sin token en carrito/login/admin/auditoría/cupones/notificaciones, preflight con origen exacto 200 e `idempotency-key`, origen ajeno 403, ruta inexistente 404, Webpay backend desplegado (`b4d8342`).
 
-**Estado general:** la evaluación 1 (EP1/EP2) está cerrada y verificada en AWS. EP3/EP4 está implementado, probado y **desplegado**: la infra del lab sobrevivió (API `13uwepgzy9`, 5 EC2, RDS) y la doble vía de login funciona viva. Lo que queda es **jubilar el authorizer nativo**, las **2 evidencias baratas** (tenant Entra ID + Postman), el **guion de defensa** y la **entrega en AVA**.
+**Verificado el 2026-11-27:** login Microsoft y Cognito en C1 (`/cuenta` muestra el id_token de Cognito, `token_use="id"`) y **pago WebPay APROBADO** en navegador con tarjeta de prueba: orden `1720e01f…`, $15.990, resultado leído del backend en `/pago/resultado`.
+
+**Pendiente:** 403 de Cliente con token real; reconciliar el intento previo con `{"message":"Not Found"}` para descartar doble cobro (Benjamín); M07/M08 no desplegados (analytics sigue con JAR del 22-11); WSS sin URL y DynamoDB sin tabla; evidencia M09 cloud (solo hay `docs/evidencias/m09-local.md`); resto de M12 (regresión UI) y ensayo individual. `environment.prod.ts` lo arma Benjamín desde C1: no editarlo desde el bloque de Matías.
+
+---
+
+## Histórico EP3/EP4 (RabbitMQ, 2026-10-10)
+
+**Actualización histórica:** Cognito verificado vivo de punta a punta: pool propio en el lab, Lambda `p360-authorizer` con valores reales conectada al API de negocio (`p360-dual`), 33 rutas explícitas (cero `{proxy+}`), segundo issuer en los 3 backends con Spring Security y matriz dual 401/403/200 comprobada con tokens reales. Auditado contra `Enunciado 2`, pauta **EP3** y pauta **EP4**.
+
+**Estado general (histórico 2026-10-10):** la evaluación 1 (EP1/EP2) quedó cerrada y verificada en AWS. EP3/EP4 estaba implementado, probado y desplegado en aquel lab (API `13uwepgzy9`, 5 EC2, RDS) con doble vía de login viva. No describir esos recursos como activos en C1 sin verificación actual.
 
 ---
 
