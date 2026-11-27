@@ -49,6 +49,18 @@ const K_ACCESS = 'p360-cognito-access';
 const K_VERIFIER = 'p360-cognito-verifier';
 const K_STATE = 'p360-cognito-state';
 
+/** Comprobación local de forma y expiración: la validación criptográfica sigue siendo del backend. */
+function tokenValido(token: string | null): token is string {
+  if (!token || token.split('.').length !== 3) return false;
+  const exp = decodePayload(token.split('.')[1])['exp'];
+  return typeof exp === 'number' && exp > Date.now() / 1000;
+}
+
+function tokenGuardado(): string | null {
+  const token = sessionStorage.getItem(K_ID);
+  return tokenValido(token) ? token : null;
+}
+
 /**
  * Segunda vía de login: Cognito Hosted UI (Authorization Code + PKCE).
  * Convive con MSAL/Azure: guarda el id_token en sessionStorage y el
@@ -56,8 +68,14 @@ const K_STATE = 'p360-cognito-state';
  */
 @Injectable({ providedIn: 'root' })
 export class CognitoAuthService {
-  readonly logueadoCognito = signal(!!sessionStorage.getItem(K_ID));
-  readonly claimsCognito = signal<CognitoClaims>(decodePayload(sessionStorage.getItem(K_ID)?.split('.')[1]));
+  private readonly tokenInicial = tokenGuardado();
+  readonly logueadoCognito = signal(!!this.tokenInicial);
+  readonly claimsCognito = signal<CognitoClaims>(decodePayload(this.tokenInicial?.split('.')[1]));
+
+  constructor() {
+    // Un id_token vencido o corrupto no es una sesión: se descarta al restaurar.
+    if (!this.tokenInicial && sessionStorage.getItem(K_ID)) this.limpiarSesionLocal();
+  }
 
   readonly nombreCognito = computed(
     () =>
@@ -80,7 +98,17 @@ export class CognitoAuthService {
    * el token pensado para llamar a un API).
    */
   token(): string | null {
-    return sessionStorage.getItem(K_ID);
+    const token = sessionStorage.getItem(K_ID);
+    if (!tokenValido(token)) {
+      if (token) this.limpiarSesionLocal();
+      return null;
+    }
+    return token;
+  }
+
+  /** La guardia pregunta al usar la sesión, no solo al construir el servicio. */
+  sesionValida(): boolean {
+    return this.token() !== null;
   }
 
   async login(): Promise<void> {
@@ -125,6 +153,7 @@ export class CognitoAuthService {
     });
     if (!resp.ok) throw new Error(`Token endpoint ${resp.status}`);
     const json = (await resp.json()) as { id_token: string; access_token: string };
+    if (!tokenValido(json.id_token)) throw new Error('id_token inválido o vencido');
     sessionStorage.setItem(K_ID, json.id_token);
     sessionStorage.setItem(K_ACCESS, json.access_token);
     sessionStorage.removeItem(K_VERIFIER);
@@ -133,11 +162,7 @@ export class CognitoAuthService {
   }
 
   logout(): void {
-    sessionStorage.removeItem(K_ID);
-    sessionStorage.removeItem(K_ACCESS);
-    sessionStorage.removeItem(K_STATE);
-    this.logueadoCognito.set(false);
-    this.claimsCognito.set({});
+    this.limpiarSesionLocal();
     const params = new URLSearchParams({
       client_id: this.cfg.clientId,
       logout_uri: environment.azure.redirectUri,
@@ -146,9 +171,14 @@ export class CognitoAuthService {
   }
 
   salirLocal(): void {
+    this.limpiarSesionLocal();
+  }
+
+  private limpiarSesionLocal(): void {
     sessionStorage.removeItem(K_ID);
     sessionStorage.removeItem(K_ACCESS);
     sessionStorage.removeItem(K_STATE);
+    sessionStorage.removeItem(K_VERIFIER);
     this.logueadoCognito.set(false);
     this.claimsCognito.set({});
   }

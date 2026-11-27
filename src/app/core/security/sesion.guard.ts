@@ -13,6 +13,6 @@ export const sesionGuard: CanActivateFn = () => {
   const cognito = inject(CognitoAuthService);
   const router = inject(Router);
   if (msal.instance.getAllAccounts().length > 0) return true;
-  if (cognito.logueadoCognito()) return true;
+  if (cognito.sesionValida()) return true;
   return router.createUrlTree(['/login']);
 };
