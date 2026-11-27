@@ -59,12 +59,12 @@ describe('ProductoService', () => {
     req.flush({ id: 'id-1', nombre: 'Nocturno', artistaOMarca: 'Ana', categoria: 'vinilo', precioClp: 19990, stock: 4 });
   });
 
-  it('usa catálogo mockeado si la API falla', () => {
-    let n = 0;
-    service.getProductos().subscribe((lista) => (n = lista.length));
+  it('propaga el error en vez de mostrar un catálogo ficticio', () => {
+    let fallo = 0;
+    service.getProductos().subscribe({ error: (err) => (fallo = err.status) });
 
     const req = http.expectOne('http://localhost:8081/productos');
-    req.flush('error', { status: 500, statusText: 'Server Error' });
-    expect(n).toBeGreaterThan(0);
+    req.flush('error', { status: 503, statusText: 'Service Unavailable' });
+    expect(fallo).toBe(503);
   });
 });

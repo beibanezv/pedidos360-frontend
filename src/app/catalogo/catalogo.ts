@@ -30,6 +30,7 @@ export class Catalogo {
   protected readonly productos = signal<Producto[]>([]);
   protected readonly cargando = signal(true);
   protected readonly error = signal(false);
+  protected readonly errorMensaje = signal('');
   protected readonly precio = formatPrecio;
   protected readonly detalle = signal<Producto | null>(null);
   protected readonly cargandoDetalle = signal(false);
@@ -90,8 +91,13 @@ export class Catalogo {
         this.productos.set(lista);
         this.cargando.set(false);
       },
-      error: () => {
+      error: (fallo) => {
         this.error.set(true);
+        this.errorMensaje.set(
+          fallo.status === 503
+            ? 'El catálogo no está disponible en este momento (503). Inténtalo nuevamente.'
+            : 'No se pudo cargar el catálogo. Revisa tu conexión e inténtalo nuevamente.',
+        );
         this.cargando.set(false);
       },
     });

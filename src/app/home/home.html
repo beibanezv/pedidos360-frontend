@@ -41,7 +41,8 @@
     @if (cargando()) {
       <p class="lead">Cargando catálogo…</p>
     } @else if (error()) {
-      <p class="lead">No se pudo cargar el catálogo.</p>
+      <p class="lead">{{ errorMensaje() }}</p>
+      <button type="button" class="btn-ghost" (click)="cargarCatalogo()">Reintentar</button>
     } @else {
       <div class="grid">
         @for (p of productos(); track p.id) {
