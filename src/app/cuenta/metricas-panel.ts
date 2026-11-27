@@ -85,11 +85,11 @@ export class MetricasPanel {
       next: ({ ticket }) => {
         if (intento !== this.intento) return;
         try {
-          const socket = new WebSocket(environment.metricasWsUrl);
+          const socket = new WebSocket(environment.metricasWsUrl + '?ticket=' + encodeURIComponent(ticket));
           this.socket = socket;
           this.esperarDatos();
           socket.onopen = () => {
-            if (this.socket === socket) socket.send(ticket);
+            if (this.socket === socket) socket.send(JSON.stringify({ action: 'suscribir' }));
           };
           socket.onmessage = event => {
             if (this.socket !== socket) return;
