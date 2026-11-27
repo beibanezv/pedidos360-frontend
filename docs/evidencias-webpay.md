@@ -2,9 +2,21 @@
 
 > **Estado 2026-11-27:** el despliegue vigente es C1 (cuenta `533267443375`). El bloque de abajo
 > corresponde al **lab mínimo del 24-11** y es histórico: sirve para explicar el flujo, no para
-> afirmar que ese entorno sigue activo. En C1 está desplegado el backend `ms-pagos` `b4d8342`
-> (rutas `ii36nav`/`29k1ghr`, JAR `dc72b050…`), pero **no hay pago aprobado en navegador**
-> verificado. No mezclar capturas de los dos labs.
+> afirmar que ese entorno sigue activo. No mezclar capturas de los dos labs.
+
+## Pago APROBADO en C1 (2026-11-27)
+
+- Frontend: `https://vnvm0n7p9a.execute-api.us-east-1.amazonaws.com/desarrollo/`
+- Backend `ms-pagos` `b4d8342` (JAR `dc72b050…`), Transbank SDK 6.2.1 en modo integración.
+- Flujo completo en navegador: catálogo → carrito → checkout → botón **Pagar con WebPay** →
+  formulario de Transbank con VISA de prueba `4051 8856 0044 6623` (CVV `123`, vencimiento futuro,
+  RUT `11.111.111-1`, clave `123`) → retorno al frontend.
+- Resultado mostrado en `/pago/resultado` (leído del backend, no del query string):
+  **¡Pago aprobado! · Orden N° `1720e01f…` · Monto $15.990 · Resultado registrado: APROBADO**.
+- El primer intento terminó en `{"message":"Not Found"}` porque el `WEBPAY_RETURN_URL` apuntaba a
+  `/desarrollo/webpay/retorno` sin el prefijo `/pagos`. Tras corregir la variable y la ruta del
+  Gateway a `POST /pagos/webpay/retorno`, el retorno funcionó. Benjamín debe reconciliar ese intento
+  previo con Transbank para descartar un doble cobro; su token no se registra aquí.
 
 ## Evidencia histórica (lab mínimo `394368726174`, 2026-11-24), región `us-east-1`.
 Sin credenciales ni tokens en este archivo.

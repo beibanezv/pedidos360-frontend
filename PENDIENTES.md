@@ -7,9 +7,9 @@
 
 **Verificado en C1:** catálogo 200 (8 productos), 401 sin token en carrito/login/admin/auditoría/cupones/notificaciones, preflight con origen exacto 200 e `idempotency-key`, origen ajeno 403, ruta inexistente 404, Webpay backend desplegado (`b4d8342`).
 
-**Verificado el 2026-11-27:** login Microsoft y Cognito en C1; `/cuenta` muestra el id_token de Cognito (`token_use="id"`, pool `us-east-1_3CqNapib5`).
+**Verificado el 2026-11-27:** login Microsoft y Cognito en C1 (`/cuenta` muestra el id_token de Cognito, `token_use="id"`) y **pago WebPay APROBADO** en navegador con tarjeta de prueba: orden `1720e01f…`, $15.990, resultado leído del backend en `/pago/resultado`.
 
-**Pendiente:** compra pequeña y pago Webpay aprobado en navegador; 403 de Cliente con token real; M07/M08 no desplegados (analytics sigue con JAR del 22-11); WSS sin URL y DynamoDB sin tabla; evidencia M09 cloud (solo hay `docs/evidencias/m09-local.md`); M12 (regresión UI) y ensayo individual. `environment.prod.ts` lo arma Benjamín desde C1: no editarlo desde el bloque de Matías.
+**Pendiente:** 403 de Cliente con token real; reconciliar el intento previo con `{"message":"Not Found"}` para descartar doble cobro (Benjamín); M07/M08 no desplegados (analytics sigue con JAR del 22-11); WSS sin URL y DynamoDB sin tabla; evidencia M09 cloud (solo hay `docs/evidencias/m09-local.md`); resto de M12 (regresión UI) y ensayo individual. `environment.prod.ts` lo arma Benjamín desde C1: no editarlo desde el bloque de Matías.
 
 ---
 
