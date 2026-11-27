@@ -5,6 +5,8 @@ import { environment } from '../../environments/environment';
 import { ExperienciaService } from '../services/experiencia.service';
 
 const MAX_REINTENTOS = 3;
+// El broadcast de EventBridge corre una vez por minuto; 8 s cerraba el panel entre envíos.
+const ESPERA_DATOS_MS = 90_000;
 
 const MEDIDAS = [
   { clave: 'vistasProducto', etiqueta: 'Fichas consultadas' },
@@ -138,7 +140,7 @@ export class MetricasPanel {
 
   private esperarDatos(): void {
     clearTimeout(this.espera);
-    this.espera = setTimeout(() => this.fallo('No llegaron datos. Vuelve a conectar.'), 8000);
+    this.espera = setTimeout(() => this.fallo('No llegaron datos. Vuelve a conectar.'), ESPERA_DATOS_MS);
   }
 
   private cerrar(mensaje: string): void {
